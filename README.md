@@ -178,20 +178,30 @@ Complete and submit the unit's AI acknowledgement form alongside this submission
 
 ## References
 
-- International Phonetic Association. (1999). *Handbook of the International Phonetic
-  Association: A guide to the use of the International Phonetic Alphabet*. Cambridge
-  University Press.
-- Gillon, G. T. (2018). *Phonological awareness: From research to practice* (2nd ed.).
-  Guilford Press.
-- Fielding, R. T., & Taylor, R. N. (2002). Principled design of the modern Web
-  architecture. *ACM Transactions on Internet Technology, 2*(2), 115–150.
-  https://doi.org/10.1145/514183.514185
-- Vercel. (2025). *Next.js documentation: Route Handlers*. Retrieved September 1, 2026,
-  from https://nextjs.org/docs/app/api-reference/file-conventions/route
-- Prisma Data, Inc. (2025). *Prisma ORM documentation*. Retrieved September 1, 2026, from
-  https://www.prisma.io/docs/orm
-- Meta Open Source. (2025). *React documentation: You might not need an effect*. Retrieved
-  September 1, 2026, from https://react.dev/learn/you-might-not-need-an-effect
-- Docker, Inc. (2025). *Best practices for writing Dockerfiles*. Retrieved September 1,
-  2026, from https://docs.docker.com/build/building/best-practices/
-- Nielsen, J. (1994). *Usability engineering*. Morgan Kaufmann.
+References are in APA 7th edition style.
+
+Fielding, R. T., & Taylor, R. N. (2002). Principled design of the modern Web architecture.
+*ACM Transactions on Internet Technology, 2*(2), 115–150.
+https://doi.org/10.1145/514183.514185
+
+Gillon, G. T. (2018). *Phonological awareness: From research to practice* (2nd ed.).
+Guilford Press.
+
+International Phonetic Association. (1999). *Handbook of the International Phonetic
+Association: A guide to the use of the International Phonetic Alphabet*. Cambridge
+University Press.
+
+Nielsen, J. (1994). *Usability engineering*. Morgan Kaufmann.
+
+Prisma Data, Inc. (2026). *Prisma ORM: Schema and relations*. Prisma documentation.
+Retrieved September 1, 2026, from https://www.prisma.io/docs/orm/prisma-schema
+
+Sadalage, P. J., & Fowler, M. (2013). *NoSQL distilled: A brief guide to the emerging
+world of polyglot persistence*. Addison-Wesley. (Referenced for relational vs.
+non-relational data-modelling trade-offs.)
+
+Vercel Inc. (2026). *Route Handlers*. Next.js documentation. Retrieved September 1, 2026,
+from https://nextjs.org/docs/app/api-reference/file-conventions/route
+
+Docker Inc. (2026). *Building best practices*. Docker documentation. Retrieved September 1,
+2026, from https://docs.docker.com/build/building/best-practices/

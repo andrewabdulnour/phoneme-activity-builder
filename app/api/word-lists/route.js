@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import {
   badRequest,
   jsonCreated,
@@ -44,8 +43,3 @@ export const POST = withErrorHandling(async (request) => {
   const created = await createWordList(data);
   return jsonCreated({ wordList: created });
 });
-
-// Preflight — explicit so browsers doing a cross-origin POST get a 204.
-export function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: { Allow: "GET, POST, OPTIONS" } });
-}
