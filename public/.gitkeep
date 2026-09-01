@@ -1,0 +1,2 @@
+# Keeps the public/ folder in git. Static files served from the site
+# root (images, robots.txt, etc.) go here.
