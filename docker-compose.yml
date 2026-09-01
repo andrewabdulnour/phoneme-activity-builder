@@ -1,0 +1,24 @@
+# Run the whole application (Next.js frontend + backend API + SQLite DB)
+# in one reproducible container:
+#
+#   docker compose up --build
+#
+# Then open http://localhost:3000 and http://localhost:3000/health
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: phoneme-activity-builder
+    ports:
+      - "3000:3000"
+    environment:
+      # SQLite database file, stored on the named volume below.
+      DATABASE_URL: "file:/app/data/prod.db"
+    volumes:
+      - phoneme-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  phoneme-data:

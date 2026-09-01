@@ -13,22 +13,25 @@ export default function AboutPage() {
 
       <section className="mt-4 max-w-3xl space-y-3 text-slate-600 dark:text-slate-300">
         <p>
-          This is <strong>Assessment 1: Frontend Design and Usability</strong> for a Wordle-style
-          web application builder aimed at Speech Pathology students and teachers. The project is
-          the first stage of a subject-long build: a tool that lets teachers create phoneme-based
-          classroom activities and export them as standalone web pages.
+          This is <strong>Assessment 2: Full-stack cloud application implementation</strong> for a
+          phoneme activity builder aimed at Speech Pathology students and teachers. It continues
+          directly from Assessment 1 (frontend design and usability): the interface is unchanged in
+          purpose, but the app is now data-driven.
         </p>
         <p>
-          <strong>This assessment is frontend only.</strong> There is no database or backend —
-          the Wordle target word and the Word Search word list are fixed in this stage. Dynamic
-          word-list management and database-driven generation are introduced in Assessment 2.
+          <strong>Assessment 2 adds the backend and database layer.</strong> Teachers create and
+          manage phoneme-based word lists and saved activity configurations, all persisted through a
+          Prisma + SQLite database and a REST API (<code>/api/word-lists</code>,{" "}
+          <code>/api/words</code>, <code>/api/activities</code>). The Wordle and Word Search
+          downloads can now be generated from stored data rather than a single hard-coded example,
+          and the whole app runs inside a Docker container with a <code>/health</code> check.
         </p>
         <p>
-          The builder currently supports two activities: a <strong>Wordle</strong> game that
-          uses a single phoneme-based target word, and a <strong>Word Search</strong> built from a
-          small fixed list of phoneme-based words. Both are designed around phoneme symbols —
-          hovering any tile shows its phonetic-to-English letter equivalence — and both can be
-          exported as a single downloadable HTML file that runs in any browser.
+          The builder supports two activities: a <strong>Wordle</strong> game that uses a single
+          phoneme-based target word, and a <strong>Word Search</strong> built from a list of
+          phoneme-based words. Both are designed around phoneme symbols — hovering any tile shows
+          its phonetic-to-English letter equivalence — and both can be exported as a single
+          downloadable HTML file that runs in any browser.
         </p>
         <p>
           The on-screen phoneme keyboard, IPA transcriptions and word corpus (90 words across 3, 4

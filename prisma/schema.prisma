@@ -1,0 +1,112 @@
+// Prisma schema for the Phoneme Activity Builder (Assessment 2).
+//
+// Data model overview:
+//   WordList  ─┬─ has many ─> Word ── has many ─> Phoneme
+//              └─ has many ─> ActivityConfig
+//
+// A phoneme is stored as its own row with a string `symbol` and an
+// integer `position`, so multi-character IPA tokens (e.g. "tʃ", "əʉ",
+// "ɐː") are stored faithfully and their order within a word is
+// preserved without any delimiter parsing.
+
+generator client {
+  provider = "prisma-client-js"
+  // `native` covers local dev (Windows/macOS/Linux); the debian target
+  // is for the node:22-slim (Debian 12 / OpenSSL 3) Docker image.
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// A named collection of phoneme-based words a teacher can build
+/// activities from.
+model WordList {
+  id            String           @id @default(cuid())
+  name          String
+  description   String?
+  /// The dominant phoneme length for this list (3, 4 or 5). Used as the
+  /// default difficulty when generating an activity; individual words
+  /// may still vary.
+  phonemeLength Int              @default(3)
+  words         Word[]
+  activities    ActivityConfig[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([name])
+}
+
+/// A single word within a WordList, together with its ordered phonemes.
+model Word {
+  id           String    @id @default(cuid())
+  wordList     WordList   @relation(fields: [wordListId], references: [id], onDelete: Cascade)
+  wordListId   String
+  /// English spelling, lower case (e.g. "chin").
+  text         String
+  /// Display spelling shown to students, upper case (e.g. "CHIN").
+  displayText  String
+  /// Denormalised count of phonemes, kept in sync on write so the API
+  /// can filter/group by difficulty without loading every phoneme.
+  phonemeCount Int        @default(0)
+  /// Optional teaching hint for this specific word.
+  hint         String?
+  /// Free-text note (not shown to students).
+  notes        String?
+  /// Ordering of the word within its list.
+  orderIndex   Int        @default(0)
+  phonemes     Phoneme[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([wordListId])
+}
+
+/// One phoneme (IPA token) at a fixed position within a Word.
+model Phoneme {
+  id       String @id @default(cuid())
+  word     Word   @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  wordId   String
+  /// The IPA symbol. May be more than one character, e.g. "tʃ", "əʉ".
+  symbol   String
+  /// 0-based index of this phoneme within the word.
+  position Int
+
+  @@unique([wordId, position])
+  @@index([wordId])
+}
+
+/// A saved Wordle or Word Search configuration built on top of a
+/// WordList. Multiple configurations per list are supported.
+model ActivityConfig {
+  id           String   @id @default(cuid())
+  name         String
+  /// "WORDLE" or "WORD_SEARCH" (validated in the API layer).
+  type         String
+  wordList     WordList @relation(fields: [wordListId], references: [id], onDelete: Cascade)
+  wordListId   String
+  /// Target phoneme length / difficulty for this activity (3, 4 or 5).
+  difficulty   Int      @default(3)
+  /// Wordle: maximum number of guesses. Null for Word Search.
+  maxGuesses   Int?
+  /// Wordle: pre-fill the first phoneme tile as a scaffold.
+  prefillFirst Boolean  @default(false)
+  /// Wordle: id of the target Word within the list. Null = first word.
+  targetWordId String?
+  /// Word Search: square grid size (e.g. 8, 10, 12). Null for Wordle.
+  gridSize     Int?
+  /// Optional hint shown with the activity.
+  hint         String?
+  /// Optional note for students shown in the generated file footer.
+  teacherNote  String?
+  /// Any additional generation metadata as JSON (extensible without a
+  /// migration), e.g. { "wordSearchCount": 5 }.
+  outputSettings Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([wordListId])
+  @@index([type])
+}
