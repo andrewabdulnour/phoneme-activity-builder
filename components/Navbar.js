@@ -8,6 +8,8 @@ const PRIMARY_LINKS = [
   { href: "/", label: "Home" },
   { href: "/wordle", label: "Wordle" },
   { href: "/word-search", label: "Word Search" },
+  { href: "/word-lists", label: "Word Lists" },
+  { href: "/activities", label: "Activities" },
 ];
 
 const MENU_LINKS = [
@@ -40,8 +42,8 @@ export default function Navbar() {
             <span className="hidden sm:inline">Phoneme Activity Builder</span>
             <span className="sm:hidden">Phoneme Builder</span>
           </Link>
-          <span className="hidden rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 md:inline dark:bg-indigo-950 dark:text-indigo-300">
-            Assessment 1 — Frontend Design &amp; Usability
+          <span className="hidden rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 lg:inline dark:bg-indigo-950 dark:text-indigo-300">
+            Assessment 2 — Backend &amp; Database
           </span>
         </div>
 
