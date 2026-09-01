@@ -42,22 +42,21 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ENV DATABASE_URL="file:/app/data/prod.db"
 
-# Run as an unprivileged user.
-RUN useradd --system --uid 1001 nextjs
-
-COPY --from=prod-deps /app/node_modules      ./node_modules
-COPY --from=builder   /app/.next             ./.next
-COPY --from=builder   /app/public            ./public
-COPY --from=builder   /app/next.config.mjs   ./next.config.mjs
-COPY --from=builder   /app/package.json      ./package.json
-COPY --from=builder   /app/prisma            ./prisma
-COPY docker-entrypoint.sh                    ./docker-entrypoint.sh
+# `node` (uid 1000) is a non-root user that already exists in the
+# official Node images.
+COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder   --chown=node:node /app/.next        ./.next
+COPY --from=builder   --chown=node:node /app/public       ./public
+COPY --from=builder   --chown=node:node /app/next.config.mjs ./next.config.mjs
+COPY --from=builder   --chown=node:node /app/package.json ./package.json
+COPY --from=builder   --chown=node:node /app/prisma       ./prisma
+COPY --chown=node:node docker-entrypoint.sh               ./docker-entrypoint.sh
 
 RUN chmod +x docker-entrypoint.sh \
  && mkdir -p /app/data \
- && chown -R nextjs:nextjs /app
+ && chown -R node:node /app/data
 
-USER nextjs
+USER node
 EXPOSE 3000
 
 # Container is healthy once /health returns 200.

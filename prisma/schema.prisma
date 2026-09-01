@@ -58,6 +58,8 @@ model Word {
   /// Ordering of the word within its list.
   orderIndex   Int        @default(0)
   phonemes     Phoneme[]
+  /// Activities that use this word as their Wordle target.
+  targetedBy   ActivityConfig[] @relation("ActivityTargetWord")
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
@@ -93,7 +95,10 @@ model ActivityConfig {
   maxGuesses   Int?
   /// Wordle: pre-fill the first phoneme tile as a scaffold.
   prefillFirst Boolean  @default(false)
-  /// Wordle: id of the target Word within the list. Null = first word.
+  /// Wordle: the target Word within the list. Null = auto-select the
+  /// first word matching the difficulty. If the word is later deleted
+  /// this is set back to null and the activity falls back to auto.
+  targetWord   Word?    @relation("ActivityTargetWord", fields: [targetWordId], references: [id], onDelete: SetNull)
   targetWordId String?
   /// Word Search: square grid size (e.g. 8, 10, 12). Null for Wordle.
   gridSize     Int?
@@ -109,4 +114,5 @@ model ActivityConfig {
 
   @@index([wordListId])
   @@index([type])
+  @@index([targetWordId])
 }
