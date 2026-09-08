@@ -1,4 +1,4 @@
-# Phoneme Activity Builder
+  # Phoneme Activity Builder
 
 **Assessment 2 — Full-stack cloud application implementation**
 Andrew Abdulnour — Student No. 20719271
@@ -163,18 +163,7 @@ fixed corpus to any saved list.
 This project's generative AI use is declared as **Full AI** per the assessment brief.
 Complete and submit the unit's AI acknowledgement form alongside this submission.
 
-## Before submitting
 
-- [ ] Set `VIDEO_EMBED_URL` in `app/about/page.js` once the walkthrough video is uploaded.
-- [ ] Record the video (student ID in the first 30 seconds; face + narration throughout)
-      covering: the schema and how it supports the builder; creating, saving, editing,
-      reading and deleting words / activities; the frontend using backend data to generate
-      Wordle and Word Search outputs; `/health` returning 200; and the app running inside a
-      Docker container.
-- [ ] `docker compose up --build` and confirm <http://localhost:3000/health> returns 200.
-- [ ] Push to GitHub and include the repo link in the submission.
-- [ ] Remove `node_modules` before zipping.
-- [ ] Complete the AI acknowledgement form.
 
 ## References
 
