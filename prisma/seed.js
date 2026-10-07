@@ -3,6 +3,10 @@
 // install. Idempotent — running it again clears the seeded rows first.
 //
 // Run with:  npm run db:seed   (or automatically via `prisma migrate reset`)
+//
+// After the real content it also generates 30 days of simulated usage
+// (see lib/simulation.mjs) so the dashboard and reports have history to
+// show. Pass --no-simulate to skip that step.
 
 const fs = require("node:fs");
 const path = require("node:path");
@@ -51,7 +55,10 @@ async function main() {
   console.log("Seeding database…");
 
   // Clear anything previously seeded (cascades to words, phonemes and
-  // activities via the schema's onDelete: Cascade).
+  // activities via the schema's onDelete: Cascade), plus the event history.
+  await prisma.generationEvent.deleteMany({});
+  await prisma.pageView.deleteMany({});
+  await prisma.auditEvent.deleteMany({});
   await prisma.activityConfig.deleteMany({});
   await prisma.wordList.deleteMany({});
 
@@ -111,6 +118,38 @@ async function main() {
   });
   console.log(`  • activity: ${wordle.name}`);
   console.log(`  • activity: ${wordSearch.name}`);
+
+  // Audit trail for the seeded content, so "activities created" counts on
+  // the dashboard include the starter activities.
+  await prisma.auditEvent.createMany({
+    data: [
+      ...Object.values(createdLists).map((l) => ({
+        entityType: "WORD_LIST",
+        action: "CREATE",
+        entityId: l.id,
+        label: l.name,
+      })),
+      ...[wordle, wordSearch].map((a) => ({
+        entityType: "ACTIVITY",
+        action: "CREATE",
+        entityId: a.id,
+        label: a.name,
+        activityType: a.type,
+      })),
+    ],
+  });
+
+  if (!process.argv.includes("--no-simulate")) {
+    // lib/simulation.mjs is ESM (shared with the Next.js server), so it is
+    // loaded with a dynamic import from this CommonJS script. A fixed seed
+    // makes the simulated history reproducible.
+    const { simulateUsage } = await import("../lib/simulation.mjs");
+    const sim = await simulateUsage(prisma, { days: 30, scale: 1, seed: 20719271 });
+    console.log(
+      `  • simulated usage: ${sim.activities} activities, ${sim.generations} generations ` +
+        `(${sim.failedGenerations} failed), ${sim.pageViews} page views over ${sim.days} days`
+    );
+  }
 
   console.log("Seed complete.");
 }

@@ -1,8 +1,19 @@
-// Prisma schema for the Phoneme Activity Builder (Assessment 2).
+// Prisma schema for the Phoneme Activity Builder (Assessments 2 and 3).
 //
 // Data model overview:
 //   WordList  ─┬─ has many ─> Word ── has many ─> Phoneme
 //              └─ has many ─> ActivityConfig
+//
+// Observability / reporting (Assessment 3) — append-only event tables
+// that the dashboard and reports aggregate over time:
+//   GenerationEvent  one row per attempt to generate an activity file
+//   PageView         one row per page visit, with visible time on page
+//   AuditEvent       one row per builder create / update / delete
+//
+// Event tables deliberately hold plain ids (no foreign keys) so the
+// history survives when the word list or activity it refers to is
+// deleted. `simulated` marks rows produced by the usage simulator so
+// they can be told apart from (and cleared without touching) real use.
 //
 // A phoneme is stored as its own row with a string `symbol` and an
 // integer `position`, so multi-character IPA tokens (e.g. "tʃ", "əʉ",
@@ -33,6 +44,8 @@ model WordList {
   phonemeLength Int              @default(3)
   words         Word[]
   activities    ActivityConfig[]
+  /// True when created by the usage simulator.
+  simulated     Boolean          @default(false)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
@@ -109,10 +122,79 @@ model ActivityConfig {
   /// Any additional generation metadata as JSON (extensible without a
   /// migration), e.g. { "wordSearchCount": 5 }.
   outputSettings Json?
+  /// True when created by the usage simulator.
+  simulated    Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   @@index([wordListId])
   @@index([type])
   @@index([targetWordId])
+}
+
+/// One attempt to generate a playable activity file, successful or not.
+/// Written by the server-side generate route (saved activities) and by
+/// the Wordle / Word Search builder pages via /api/telemetry/generation.
+model GenerationEvent {
+  id           String   @id @default(cuid())
+  /// "WORDLE" or "WORD_SEARCH".
+  activityType String
+  /// "SAVED_ACTIVITY" (server route) or "BUILDER" (builder pages).
+  source       String
+  /// "SUCCESS" or "FAILED".
+  status       String
+  /// Why a failed attempt failed (null on success).
+  errorMessage String?
+  /// Saved activity / word list behind the attempt, when known.
+  activityId   String?
+  wordListId   String?
+  /// Phoneme length of the activity (3, 4, 5 …).
+  difficulty   Int?
+  /// "preview" (opened in the browser) or "download" (saved as a file).
+  mode         String   @default("preview")
+  /// Server-side time spent building the file.
+  durationMs   Int      @default(0)
+  /// Size of the generated HTML file in bytes (null on failure).
+  outputBytes  Int?
+  simulated    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([status])
+  @@index([activityType])
+  @@index([wordListId])
+}
+
+/// A single visit to a page of the builder, recorded when the visitor
+/// leaves (or hides) the page. `durationMs` counts visible time only.
+model PageView {
+  id         String   @id @default(cuid())
+  /// App route, e.g. "/wordle" or "/dashboard".
+  path       String
+  durationMs Int
+  simulated  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([path])
+  @@index([createdAt])
+}
+
+/// Append-only audit trail of builder CRUD operations, so creation
+/// counts stay accurate even after records are deleted.
+model AuditEvent {
+  id           String   @id @default(cuid())
+  /// "WORD_LIST", "WORD" or "ACTIVITY".
+  entityType   String
+  /// "CREATE", "UPDATE" or "DELETE".
+  action       String
+  entityId     String
+  /// Human-readable name of the record at the time of the change.
+  label        String?
+  /// For activities: "WORDLE" or "WORD_SEARCH".
+  activityType String?
+  simulated    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entityType, action])
 }
