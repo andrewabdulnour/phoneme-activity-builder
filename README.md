@@ -2,6 +2,7 @@
 
 **Assessment 3 — Data-driven dashboard, observability and testing**
 Andrew Abdulnour — Student No. 20719271
+GitHub: https://github.com/andrewabdulnour/phoneme-activity-builder
 
 A full-stack builder for phoneme-based classroom activities for Speech Pathology students
 and teachers. Teachers manage phoneme-based **word lists** and saved **activity
