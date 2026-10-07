@@ -23,6 +23,12 @@ export default function HomePage() {
           >
             Build a Word Search
           </Link>
+          <Link
+            href="/dashboard"
+            className="rounded-lg border border-slate-300 px-5 py-2.5 font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            View dashboard
+          </Link>
         </div>
       </section>
 
@@ -40,8 +46,8 @@ export default function HomePage() {
           body="Generated files are self-contained — no server, database, or internet connection required to run them in a browser."
         />
         <FeatureCard
-          title="Built for iteration"
-          body="Assessment 1 focuses on the frontend and a fixed activity set. A word-list database and richer generation arrive in later assessments."
+          title="Monitored and reported"
+          body="Every generation, page visit and change is recorded. The Dashboard shows live health, usage statistics and alerts; Reports chart usage over time."
         />
       </section>
 
@@ -64,7 +70,7 @@ export default function HomePage() {
 function FeatureCard({ title, body }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-      <h3 className="font-semibold text-slate-900 dark:text-white">{title}</h3>
+      <h2 className="font-semibold text-slate-900 dark:text-white">{title}</h2>
       <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">{body}</p>
     </div>
   );

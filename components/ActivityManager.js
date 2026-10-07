@@ -21,6 +21,23 @@ function Alert({ children }) {
 
 const TYPE_LABEL = { WORDLE: "Wordle", WORD_SEARCH: "Word Search" };
 
+// Problems with a saved activity that mean its generated file will fail
+// or not be what the teacher expects. Mirrors the dashboard alert rules.
+function activityWarning(activity, list) {
+  if (!list) return null;
+  if (list.wordCount === 0) {
+    return `"${list.name}" has no words — generating this activity will fail.`;
+  }
+  if (
+    activity.type === "WORDLE" &&
+    !activity.targetWordId &&
+    !list.words.some((w) => w.phonemes.length === activity.difficulty)
+  ) {
+    return `No ${activity.difficulty}-phoneme word in "${list.name}" — a word of a different length will be used.`;
+  }
+  return null;
+}
+
 export default function ActivityManager() {
   const [activities, setActivities] = useState([]);
   const [lists, setLists] = useState([]);
@@ -110,7 +127,7 @@ export default function ActivityManager() {
     }
   }
 
-  if (loading) return <p className="text-sm text-slate-500">Loading activities…</p>;
+  if (loading) return <p className="text-sm text-slate-600 dark:text-slate-400">Loading activities…</p>;
 
   return (
     <div className="flex flex-col gap-6">
@@ -122,9 +139,9 @@ export default function ActivityManager() {
         </h2>
 
         {lists.length === 0 ? (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             Create a word list first on the{" "}
-            <a href="/word-lists" className="text-indigo-600 hover:underline dark:text-indigo-400">
+            <a href="/word-lists" className="text-indigo-700 underline underline-offset-2 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">
               Word Lists
             </a>{" "}
             page.
@@ -263,50 +280,62 @@ export default function ActivityManager() {
           Saved activities ({activities.length})
         </h2>
         <ul className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
-          {activities.map((a) => (
-            <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-              <div>
-                <p className="font-semibold text-slate-800 dark:text-slate-100">
-                  <span className="mr-2 rounded bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
-                    {TYPE_LABEL[a.type] ?? a.type}
-                  </span>
-                  {a.name}
-                </p>
-                <p className="mt-0.5 text-xs text-slate-500">
-                  {a.wordListName} · difficulty {a.difficulty}
-                  {a.type === "WORDLE"
-                    ? ` · ${a.maxGuesses} guesses`
-                    : ` · ${a.gridSize}×${a.gridSize} grid`}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <a
-                  href={`/api/activities/${a.id}/generate`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  Preview
-                </a>
-                <a
-                  href={`/api/activities/${a.id}/generate?download=1`}
-                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700"
-                >
-                  Download .html
-                </a>
-                <button
-                  type="button"
-                  onClick={() => remove(a.id, a.name)}
-                  disabled={busy}
-                  className="rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:hover:bg-red-950"
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
+          {activities.map((a) => {
+            const warning = activityWarning(a, lists.find((l) => l.id === a.wordListId));
+            return (
+              <li key={a.id} data-testid="activity-row" className="flex flex-wrap items-center justify-between gap-3 py-3">
+                <div>
+                  <p className="font-semibold text-slate-800 dark:text-slate-100">
+                    <span className="mr-2 rounded bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                      {TYPE_LABEL[a.type] ?? a.type}
+                    </span>
+                    {a.name}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+                    {a.wordListName} · difficulty {a.difficulty}
+                    {a.type === "WORDLE"
+                      ? ` · ${a.maxGuesses} guesses`
+                      : ` · ${a.gridSize}×${a.gridSize} grid`}
+                  </p>
+                  {warning && (
+                    <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-amber-800 dark:text-amber-300">
+                      <span aria-hidden="true">⚠</span>
+                      <span>
+                        <span className="sr-only">Warning: </span>
+                        {warning}
+                      </span>
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href={`/api/activities/${a.id}/generate`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+                  >
+                    Preview
+                  </a>
+                  <a
+                    href={`/api/activities/${a.id}/generate?download=1`}
+                    className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700"
+                  >
+                    Download .html
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => remove(a.id, a.name)}
+                    disabled={busy}
+                    className="rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:hover:bg-red-950 dark:text-red-400"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            );
+          })}
           {activities.length === 0 && (
-            <li className="py-3 text-sm text-slate-500">No saved activities yet.</li>
+            <li className="py-3 text-sm text-slate-600 dark:text-slate-400">No saved activities yet.</li>
           )}
         </ul>
       </div>

@@ -168,41 +168,46 @@ export default function WordSearchGame({ wordList, size }) {
           className="grid touch-none select-none gap-0.5 rounded-lg border border-slate-300 bg-slate-300 p-0.5 dark:border-slate-700 dark:bg-slate-700"
           style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}
         >
-          {grid.map((row, r) =>
-            row.map((token, c) => {
-              const key = cellKey(r, c);
-              const isSelecting = selectingKeys.has(key);
-              const isFound = isFoundCell(r, c);
-              const isFocusable = focusPos[0] === r && focusPos[1] === c;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  data-row={r}
-                  data-col={c}
-                  tabIndex={isFocusable ? 0 : -1}
-                  title={tooltipFor(token)}
-                  aria-label={`Row ${r + 1}, column ${c + 1}: ${token}. ${tooltipFor(token)}`}
-                  onFocus={() => setFocusPos([r, c])}
-                  onPointerDown={() => onPointerDown(r, c)}
-                  onPointerEnter={() => onPointerEnter(r, c)}
-                  className={`flex h-9 min-w-8 cursor-pointer items-center justify-center rounded-sm px-0.5 text-xs font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600 sm:h-10 sm:min-w-9 sm:text-sm ${
-                    isFound
-                      ? "bg-emerald-500 text-white"
-                      : isSelecting
-                      ? "bg-amber-400 text-white"
-                      : "bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100"
-                  }`}
-                >
-                  {token}
-                </button>
-              );
-            })
-          )}
+          {grid.map((row, r) => (
+            // role="row" wrappers give the ARIA grid its required row
+            // structure; `display: contents` keeps the CSS grid layout.
+            <div key={r} role="row" className="contents">
+              {row.map((token, c) => {
+                const key = cellKey(r, c);
+                const isSelecting = selectingKeys.has(key);
+                const isFound = isFoundCell(r, c);
+                const isFocusable = focusPos[0] === r && focusPos[1] === c;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    role="gridcell"
+                    data-row={r}
+                    data-col={c}
+                    tabIndex={isFocusable ? 0 : -1}
+                    title={tooltipFor(token)}
+                    aria-label={`Row ${r + 1}, column ${c + 1}: ${token}. ${tooltipFor(token)}`}
+                    onFocus={() => setFocusPos([r, c])}
+                    onPointerDown={() => onPointerDown(r, c)}
+                    onPointerEnter={() => onPointerEnter(r, c)}
+                    className={`flex h-9 min-w-8 cursor-pointer items-center justify-center rounded-sm px-0.5 text-xs font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600 sm:h-10 sm:min-w-9 sm:text-sm ${
+                      isFound
+                        ? "bg-emerald-500 text-white"
+                        : isSelecting
+                        ? "bg-amber-400 text-white"
+                        : "bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100"
+                    }`}
+                  >
+                    {token}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </div>
 
         <div className="min-w-[14rem] rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <h3 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Find these words</h3>
+          <h2 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Find these words</h2>
           <ul className="flex flex-col gap-1.5">
             {wordList.map((w) => (
               <li

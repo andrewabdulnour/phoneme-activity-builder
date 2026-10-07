@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PageTimeTracker from "@/components/PageTimeTracker";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
 const geistSans = Geist({
@@ -15,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Phoneme Activity Builder — Assessment 1",
+  title: "Phoneme Activity Builder",
   description:
-    "A frontend builder for phoneme-based Wordle and Word Search classroom activities for Speech Pathology students.",
+    "A data-driven builder for phoneme-based Wordle and Word Search classroom activities for Speech Pathology students, with a usage dashboard and reports.",
 };
 
 export default function RootLayout({ children }) {
@@ -33,10 +34,11 @@ export default function RootLayout({ children }) {
           Skip to main content
         </a>
         <Navbar />
-        <main id="main-content" className="density-px density-py mx-auto w-full max-w-5xl flex-1">
+        <main id="main-content" className="density-px density-py mx-auto w-full max-w-6xl flex-1">
           {children}
         </main>
         <Footer />
+        <PageTimeTracker />
       </body>
     </html>
   );

@@ -153,7 +153,7 @@ export default function WordListManager() {
     }
   }
 
-  if (loading) return <p className="text-sm text-slate-500">Loading word lists…</p>;
+  if (loading) return <p className="text-sm text-slate-600 dark:text-slate-400">Loading word lists…</p>;
 
   return (
     <div className="flex flex-col gap-6">
@@ -163,7 +163,7 @@ export default function WordListManager() {
         {/* Left: list of word lists + create */}
         <div className="flex flex-col gap-4">
           <div className={CARD}>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
               Word lists ({lists.length})
             </h2>
             <ul className="flex flex-col gap-1">
@@ -184,12 +184,13 @@ export default function WordListManager() {
                     <span className="font-medium">{l.name}</span>
                     <span className="block text-xs opacity-80">
                       {l.wordCount} words · {l.activityCount} activities
+                      {l.wordCount === 0 && " · ⚠ empty"}
                     </span>
                   </button>
                 </li>
               ))}
               {lists.length === 0 && (
-                <li className="text-sm text-slate-500">No word lists yet — create one below.</li>
+                <li className="text-sm text-slate-600 dark:text-slate-400">No word lists yet — create one below.</li>
               )}
             </ul>
           </div>
@@ -218,7 +219,7 @@ export default function WordListManager() {
 
         {/* Right: selected list detail */}
         <div className="flex flex-col gap-4">
-          {!selected && <p className="text-sm text-slate-500">Select or create a word list.</p>}
+          {!selected && <p className="text-sm text-slate-600 dark:text-slate-400">Select or create a word list.</p>}
 
           {selected && (
             <>
@@ -232,13 +233,19 @@ export default function WordListManager() {
                       {selected.description}
                     </p>
                   )}
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                     {selected.wordCount} words · dominant length {selected.phonemeLength}
                   </p>
+                  {selected.wordCount === 0 && (
+                    <p className="mt-2 text-sm font-medium text-amber-800 dark:text-amber-300">
+                      <span aria-hidden="true">⚠ </span>
+                      This list is empty. Activities built from it cannot be generated until you add words.
+                    </p>
+                  )}
                 </div>
                 <button
                   type="button"
-                  className="rounded-lg border border-red-300 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:hover:bg-red-950"
+                  className="rounded-lg border border-red-300 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:hover:bg-red-950 dark:text-red-400"
                   disabled={busy}
                   onClick={() => {
                     if (confirm(`Delete "${selected.name}" and all its words?`)) {
@@ -257,11 +264,13 @@ export default function WordListManager() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
                     <thead>
-                      <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-700">
+                      <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-600 dark:border-slate-700 dark:text-slate-400">
                         <th className="py-2 pr-3">Word</th>
                         <th className="py-2 pr-3">Phonemes</th>
                         <th className="py-2 pr-3">Hint</th>
-                        <th className="py-2" />
+                        <th className="py-2">
+                          <span className="sr-only">Actions</span>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -293,7 +302,7 @@ export default function WordListManager() {
                               <td className="py-2 pr-3 tracking-wide text-slate-600 dark:text-slate-300">
                                 {w.phonemes.map((p) => `/${p}/`).join(" ")}
                               </td>
-                              <td className="py-2 pr-3 text-slate-500">{w.hint || "—"}</td>
+                              <td className="py-2 pr-3 text-slate-600 dark:text-slate-400">{w.hint || "—"}</td>
                               <td className="py-2 text-right whitespace-nowrap">
                                 <button
                                   type="button"
@@ -305,7 +314,7 @@ export default function WordListManager() {
                                 </button>
                                 <button
                                   type="button"
-                                  className="text-red-600 hover:underline disabled:opacity-50"
+                                  className="text-red-600 hover:underline disabled:opacity-50 dark:text-red-400"
                                   disabled={busy}
                                   onClick={() => {
                                     if (confirm(`Delete "${w.display}"?`)) {
@@ -325,7 +334,7 @@ export default function WordListManager() {
                       ))}
                       {selected.words.length === 0 && (
                         <tr>
-                          <td colSpan={4} className="py-3 text-slate-500">
+                          <td colSpan={4} className="py-3 text-slate-600 dark:text-slate-400">
                             No words yet — add one below.
                           </td>
                         </tr>

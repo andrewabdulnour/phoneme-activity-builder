@@ -142,7 +142,7 @@ export default function WordleGame({ word, length }) {
       <div className="flex w-full max-w-2xl flex-col items-center gap-3">
         {IPA_KEYBOARD_GROUPS.map((group) => (
           <div key={group.label} className="w-full">
-            <p className="mb-1 text-center text-[0.65rem] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            <p className="mb-1 text-center text-[0.65rem] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
               {group.label}
             </p>
             <div className="flex flex-col items-center gap-1.5">

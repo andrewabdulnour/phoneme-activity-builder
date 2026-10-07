@@ -22,7 +22,7 @@ export default function PhonemePicker({ value, onChange, disabled }) {
         aria-label="Current phoneme sequence"
       >
         {value.length === 0 && (
-          <span className="px-1 text-sm text-slate-400">
+          <span className="px-1 text-sm text-slate-500 dark:text-slate-400">
             Tap phonemes below to build the word…
           </span>
         )}
@@ -53,7 +53,7 @@ export default function PhonemePicker({ value, onChange, disabled }) {
       <div className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950">
         {IPA_KEYBOARD_GROUPS.map((group) => (
           <div key={group.label}>
-            <p className="mb-1 text-[0.6rem] font-semibold uppercase tracking-wider text-slate-400">
+            <p className="mb-1 text-[0.6rem] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               {group.label}
             </p>
             <div className="flex flex-wrap gap-1">
@@ -73,7 +73,7 @@ export default function PhonemePicker({ value, onChange, disabled }) {
             </div>
           </div>
         ))}
-        <p className="text-[0.7rem] text-slate-400">{KNOWN_PHONEMES_HINT}</p>
+        <p className="text-[0.7rem] text-slate-500 dark:text-slate-400">{KNOWN_PHONEMES_HINT}</p>
       </div>
     </div>
   );

@@ -58,3 +58,33 @@ body {
 .skip-link:focus {
   left: 0;
 }
+
+/* --- Dashboard & report charts (Assessment 3) ----------------------------
+   Colours are referenced by role so light/dark swap in one place.
+   Series slots: Wordle = slot 1 (blue), Word Search = slot 2 (orange) —
+   the same activity type keeps the same colour on every chart. Status
+   colours are reserved for health/alerts and always ship with an icon
+   and a text label. Palette validated for colour-vision deficiency. */
+:root {
+  --viz-surface: #ffffff;
+  --viz-grid: #e5e7eb;
+  --viz-axis: #cbd5e1;
+  --viz-muted: #64748b;
+  --viz-series-1: #2a78d6;
+  --viz-series-2: #eb6834;
+  --viz-neutral: #94a3b8;
+  --status-good: #0ca30c;
+  --status-warning: #fab219;
+  --status-critical: #d03b3b;
+  --status-info: #2a78d6;
+}
+.dark {
+  --viz-surface: #0f172a;
+  --viz-grid: #1e293b;
+  --viz-axis: #334155;
+  --viz-muted: #94a3b8;
+  --viz-series-1: #3987e5;
+  --viz-series-2: #d95926;
+  --viz-neutral: #64748b;
+  --status-info: #3987e5;
+}

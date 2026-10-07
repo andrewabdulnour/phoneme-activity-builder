@@ -13,13 +13,25 @@ export default function AboutPage() {
 
       <section className="mt-4 max-w-3xl space-y-3 text-slate-600 dark:text-slate-300">
         <p>
-          This is <strong>Assessment 2: Full-stack cloud application implementation</strong> for a
+          This is <strong>Assessment 3: Data-driven web application and reporting</strong> for a
           phoneme activity builder aimed at Speech Pathology students and teachers. It continues
-          directly from Assessment 1 (frontend design and usability): the interface is unchanged in
-          purpose, but the app is now data-driven.
+          directly from Assessment 1 (frontend design and usability) and Assessment 2 (backend,
+          database and Docker).
         </p>
         <p>
-          <strong>Assessment 2 adds the backend and database layer.</strong> Teachers create and
+          <strong>Assessment 3 adds observability and reporting.</strong> Every activity generation
+          (successful or failed), page visit and builder change is stored in the database. The{" "}
+          <a href="/dashboard" className="text-indigo-700 underline underline-offset-2 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">Dashboard</a>{" "}
+          shows live health from <code>/health</code>, activity and generation counts, average time
+          on page, the most-used activity type, alerts for failed generations, empty word lists and
+          invalid data, and server request metrics. The{" "}
+          <a href="/reports" className="text-indigo-700 underline underline-offset-2 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">Reports</a>{" "}
+          page charts usage over 7, 30 or 90 days with CSV export. A usage simulator creates
+          realistic classroom records for demonstration. The app is tested end-to-end with
+          Playwright, load-tested with JMeter and checked for accessibility with Lighthouse.
+        </p>
+        <p>
+          <strong>Assessment 2 added the backend and database layer.</strong> Teachers create and
           manage phoneme-based word lists and saved activity configurations, all persisted through a
           Prisma + SQLite database and a REST API (<code>/api/word-lists</code>,{" "}
           <code>/api/words</code>, <code>/api/activities</code>). The Wordle and Word Search
@@ -69,7 +81,7 @@ export default function AboutPage() {
               allowFullScreen
             />
           ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-1 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex h-full flex-col items-center justify-center gap-1 p-6 text-center text-sm text-slate-600 dark:text-slate-400">
               <span className="font-medium">Video not yet linked</span>
               <span>
                 Set <code>VIDEO_EMBED_URL</code> in{" "}

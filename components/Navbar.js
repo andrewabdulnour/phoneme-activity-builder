@@ -10,6 +10,8 @@ const PRIMARY_LINKS = [
   { href: "/word-search", label: "Word Search" },
   { href: "/word-lists", label: "Word Lists" },
   { href: "/activities", label: "Activities" },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/reports", label: "Reports" },
 ];
 
 const MENU_LINKS = [
@@ -35,19 +37,19 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2 font-bold text-indigo-700 dark:text-indigo-400">
             <span aria-hidden="true" className="text-xl">🔤</span>
             <span className="hidden sm:inline">Phoneme Activity Builder</span>
             <span className="sm:hidden">Phoneme Builder</span>
           </Link>
-          <span className="hidden rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 lg:inline dark:bg-indigo-950 dark:text-indigo-300">
-            Assessment 2 — Backend &amp; Database
+          <span className="hidden rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 xl:inline dark:bg-indigo-950 dark:text-indigo-300">
+            Assessment 3 — Data &amp; Reporting
           </span>
         </div>
 
-        <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
+        <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
           {PRIMARY_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -112,7 +114,7 @@ export default function Navbar() {
             aria-haspopup="menu"
             aria-expanded={mobileOpen}
             aria-label="Toggle navigation menu"
-            className="rounded-md p-2 text-slate-600 hover:bg-slate-100 md:hidden dark:text-slate-300 dark:hover:bg-slate-800"
+            className="rounded-md p-2 text-slate-600 hover:bg-slate-100 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
           >
             <svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
               <path d="M3 5h14M3 10h14M3 15h14" strokeLinecap="round" />
@@ -122,7 +124,7 @@ export default function Navbar() {
       </div>
 
       {mobileOpen && (
-        <nav aria-label="Mobile" className="border-t border-slate-200 px-4 py-2 md:hidden dark:border-slate-800">
+        <nav aria-label="Mobile" className="border-t border-slate-200 px-4 py-2 lg:hidden dark:border-slate-800">
           {[...PRIMARY_LINKS, ...MENU_LINKS].map((link) => (
             <Link
               key={link.href}

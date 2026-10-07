@@ -7,6 +7,7 @@ import { PHONEME_LENGTHS, getWordSearchList } from "@/lib/phonemeData";
 import { generateWordSearchHtml } from "@/lib/generateWordSearchHtml";
 import { downloadHtmlFile } from "@/lib/download";
 import { api } from "@/lib/apiClient";
+import { generateWithTelemetry } from "@/lib/generationTelemetry";
 
 // The puzzle layout is randomised (Math.random) at render time, so it
 // must only ever run in the browser — server-rendering it would bake
@@ -28,6 +29,7 @@ export default function WordSearchBuilderPage() {
   const [length, setLength] = useState(3);
   const [size, setSize] = useState(10);
   const [teacherNote, setTeacherNote] = useState("");
+  const [generateError, setGenerateError] = useState("");
   const [source, setSource] = useState(CORPUS);
   const [lists, setLists] = useState([]);
 
@@ -52,7 +54,19 @@ export default function WordSearchBuilderPage() {
   }, [activeList, length]);
 
   function handleGenerate() {
-    const html = generateWordSearchHtml({ wordList, size, teacherNote, length });
+    setGenerateError("");
+    let html;
+    try {
+      html = generateWithTelemetry({
+        activityType: "WORD_SEARCH",
+        wordListId: activeList?.id,
+        difficulty: length,
+        build: () => generateWordSearchHtml({ wordList, size, teacherNote, length }),
+      });
+    } catch (err) {
+      setGenerateError(`Could not generate the Word Search file: ${err.message}`);
+      return;
+    }
     const slug = activeList ? activeList.name.toLowerCase().replace(/\s+/g, "-") : `${length}phoneme`;
     downloadHtmlFile(`phoneme-word-search-${slug}.html`, html);
   }
@@ -63,11 +77,11 @@ export default function WordSearchBuilderPage() {
       <p className="mt-1 max-w-2xl text-slate-600 dark:text-slate-400">
         Choose a phoneme length and grid size. Each grid cell holds one phoneme (not one English
         letter). Words come from the fixed HCE corpus, or from a{" "}
-        <Link href="/word-lists" className="text-indigo-600 hover:underline dark:text-indigo-400">
+        <Link href="/word-lists" className="text-indigo-700 underline underline-offset-2 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">
           saved word list
         </Link>
         . Save reusable configurations on the{" "}
-        <Link href="/activities" className="text-indigo-600 hover:underline dark:text-indigo-400">
+        <Link href="/activities" className="text-indigo-700 underline underline-offset-2 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">
           Activities
         </Link>{" "}
         page.
@@ -150,6 +164,11 @@ export default function WordSearchBuilderPage() {
           >
             Generate .html file
           </button>
+          {generateError && (
+            <p role="alert" className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+              {generateError}
+            </p>
+          )}
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Downloads a single, self-contained HTML page with a puzzle baked in — no server needed.
           </p>
@@ -159,7 +178,7 @@ export default function WordSearchBuilderPage() {
           {wordList.length ? (
             <WordSearchGame key={`${source}-${length}-${size}`} wordList={wordList} size={size} />
           ) : (
-            <p className="text-sm text-slate-500">Choose a source with words at this length.</p>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Choose a source with words at this length.</p>
           )}
         </div>
       </div>

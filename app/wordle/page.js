@@ -7,6 +7,7 @@ import { PHONEME_LENGTHS, getWordsByLength, getWord } from "@/lib/phonemeData";
 import { generateWordleHtml } from "@/lib/generateWordleHtml";
 import { downloadHtmlFile } from "@/lib/download";
 import { api } from "@/lib/apiClient";
+import { generateWithTelemetry } from "@/lib/generationTelemetry";
 
 const CORPUS = "__corpus__";
 
@@ -14,6 +15,7 @@ export default function WordleBuilderPage() {
   const [length, setLength] = useState(3);
   const [wordName, setWordName] = useState(getWordsByLength(3)[0].word);
   const [teacherNote, setTeacherNote] = useState("");
+  const [generateError, setGenerateError] = useState("");
 
   // Optional: pull the word pool from a saved database word list instead
   // of the fixed HCE corpus (Assessment 2 integration).
@@ -64,8 +66,18 @@ export default function WordleBuilderPage() {
   }
 
   function handleGenerate() {
-    const html = generateWordleHtml({ word, length: word.phonemes.length, teacherNote });
-    downloadHtmlFile(`phoneme-wordle-${word.word}.html`, html);
+    setGenerateError("");
+    try {
+      const html = generateWithTelemetry({
+        activityType: "WORDLE",
+        wordListId: activeList?.id,
+        difficulty: word.phonemes.length,
+        build: () => generateWordleHtml({ word, length: word.phonemes.length, teacherNote }),
+      });
+      downloadHtmlFile(`phoneme-wordle-${word.word}.html`, html);
+    } catch (err) {
+      setGenerateError(`Could not generate the Wordle file: ${err.message}`);
+    }
   }
 
   return (
@@ -74,11 +86,11 @@ export default function WordleBuilderPage() {
       <p className="mt-1 max-w-2xl text-slate-600 dark:text-slate-400">
         Choose a phoneme length (the difficulty) and a target word, preview the phoneme Wordle, then
         generate a downloadable version. Words come from the fixed HCE corpus, or from a{" "}
-        <Link href="/word-lists" className="text-indigo-600 hover:underline dark:text-indigo-400">
+        <Link href="/word-lists" className="text-indigo-700 underline underline-offset-2 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">
           saved word list
         </Link>
         . To save reusable configurations, use the{" "}
-        <Link href="/activities" className="text-indigo-600 hover:underline dark:text-indigo-400">
+        <Link href="/activities" className="text-indigo-700 underline underline-offset-2 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">
           Activities
         </Link>{" "}
         page.
@@ -159,6 +171,11 @@ export default function WordleBuilderPage() {
           >
             Generate .html file
           </button>
+          {generateError && (
+            <p role="alert" className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+              {generateError}
+            </p>
+          )}
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Downloads a single, self-contained HTML page you can open in any browser or share with
             students.
@@ -169,7 +186,7 @@ export default function WordleBuilderPage() {
           {word ? (
             <WordleGame key={`${source}-${word.word}-${word.phonemes.length}`} word={word} length={word.phonemes.length} />
           ) : (
-            <p className="text-sm text-slate-500">This word list has no words yet.</p>
+            <p className="text-sm text-slate-600 dark:text-slate-400">This word list has no words yet.</p>
           )}
         </div>
       </div>
