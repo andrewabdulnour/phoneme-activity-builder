@@ -1,0 +1,316 @@
+[
+  {
+    "page": "/",
+    "score": 98,
+    "failed": [
+      {
+        "id": "heading-order",
+        "title": "Heading elements are not in a sequentially-descending order",
+        "items": 1,
+        "nodes": [
+          {
+            "selector": "div.py-10 > section.mt-10 > div.rounded-xl > h3.font-semibold",
+            "snippet": "<h3 class=\"font-semibold text-slate-900 dark:text-white\">",
+            "explanation": "Fix any of the following:\n  Heading order invalid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page": "/wordle",
+    "score": 93,
+    "failed": [
+      {
+        "id": "color-contrast",
+        "title": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "items": 6,
+        "nodes": [
+          {
+            "selector": "div.flex > div.flex > div.w-full > p.mb-1",
+            "snippet": "<p class=\"mb-1 text-center text-[0.65rem] font-semibold uppercase tracking-wider tex…\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 4.23 (foreground color: #62748e, background color: #020618, font size: 7.8pt (10.4px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "div.flex > div.flex > div.w-full > p.mb-1",
+            "snippet": "<p class=\"mb-1 text-center text-[0.65rem] font-semibold uppercase tracking-wider tex…\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 4.23 (foreground color: #62748e, background color: #020618, font size: 7.8pt (10.4px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "div.flex > div.flex > div.w-full > p.mb-1",
+            "snippet": "<p class=\"mb-1 text-center text-[0.65rem] font-semibold uppercase tracking-wider tex…\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 4.23 (foreground color: #62748e, background color: #020618, font size: 7.8pt (10.4px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "div.flex > div.flex > div.w-full > p.mb-1",
+            "snippet": "<p class=\"mb-1 text-center text-[0.65rem] font-semibold uppercase tracking-wider tex…\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 4.23 (foreground color: #62748e, background color: #020618, font size: 7.8pt (10.4px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "div.flex > div.flex > div.w-full > p.mb-1",
+            "snippet": "<p class=\"mb-1 text-center text-[0.65rem] font-semibold uppercase tracking-wider tex…\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 4.23 (foreground color: #62748e, background color: #020618, font size: 7.8pt (10.4px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "div.flex > div.flex > div.w-full > p.mb-1",
+            "snippet": "<p class=\"mb-1 text-center text-[0.65rem] font-semibold uppercase tracking-wider tex…\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 4.23 (foreground color: #62748e, background color: #020618, font size: 7.8pt (10.4px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      },
+      {
+        "id": "link-in-text-block",
+        "title": "Links rely on color to be distinguishable.",
+        "items": 2,
+        "nodes": [
+          {
+            "selector": "main#main-content > div.py-8 > p.mt-1 > a.text-indigo-600",
+            "snippet": "<a class=\"text-indigo-600 hover:underline dark:text-indigo-400\" href=\"/word-lists\">",
+            "explanation": "Fix any of the following:\n  The link has insufficient color contrast of 1.18:1 with the surrounding text. (Minimum contrast is 3:1, link text: #7c86ff, surrounding text: #90a1b9)\n  The link has no styling (such as underline) to distinguish it from the surrounding text"
+          },
+          {
+            "selector": "main#main-content > div.py-8 > p.mt-1 > a.text-indigo-600",
+            "snippet": "<a class=\"text-indigo-600 hover:underline dark:text-indigo-400\" href=\"/activities\">",
+            "explanation": "Fix any of the following:\n  The link has insufficient color contrast of 1.18:1 with the surrounding text. (Minimum contrast is 3:1, link text: #7c86ff, surrounding text: #90a1b9)\n  The link has no styling (such as underline) to distinguish it from the surrounding text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page": "/word-search",
+    "score": 91,
+    "failed": [
+      {
+        "id": "aria-required-children",
+        "title": "Elements with an ARIA `[role]` that require children to contain a specific `[role]` are missing some or all of those required children.",
+        "items": 1,
+        "nodes": [
+          {
+            "selector": "div.rounded-xl > div.flex > div.flex > div.grid",
+            "snippet": "<div role=\"grid\" aria-label=\"Phoneme word search grid. Arrow keys to move, Enter to start and finish a …\" class=\"grid touch-none select-none gap-0.5 rounded-lg border border-slate-300 bg-…\" style=\"grid-template-columns: repeat(10, minmax(0px, 1fr));\">",
+            "explanation": "Fix any of the following:\n  Element has children which are not allowed: button[aria-label]"
+          }
+        ]
+      },
+      {
+        "id": "heading-order",
+        "title": "Heading elements are not in a sequentially-descending order",
+        "items": 1,
+        "nodes": [
+          {
+            "selector": "div.flex > div.flex > div.min-w-[14rem] > h3.mb-2",
+            "snippet": "<h3 class=\"mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100\">",
+            "explanation": "Fix any of the following:\n  Heading order invalid"
+          }
+        ]
+      },
+      {
+        "id": "link-in-text-block",
+        "title": "Links rely on color to be distinguishable.",
+        "items": 2,
+        "nodes": [
+          {
+            "selector": "main#main-content > div.py-8 > p.mt-1 > a.text-indigo-600",
+            "snippet": "<a class=\"text-indigo-600 hover:underline dark:text-indigo-400\" href=\"/word-lists\">",
+            "explanation": "Fix any of the following:\n  The link has insufficient color contrast of 1.18:1 with the surrounding text. (Minimum contrast is 3:1, link text: #7c86ff, surrounding text: #90a1b9)\n  The link has no styling (such as underline) to distinguish it from the surrounding text"
+          },
+          {
+            "selector": "main#main-content > div.py-8 > p.mt-1 > a.text-indigo-600",
+            "snippet": "<a class=\"text-indigo-600 hover:underline dark:text-indigo-400\" href=\"/activities\">",
+            "explanation": "Fix any of the following:\n  The link has insufficient color contrast of 1.18:1 with the surrounding text. (Minimum contrast is 3:1, link text: #7c86ff, surrounding text: #90a1b9)\n  The link has no styling (such as underline) to distinguish it from the surrounding text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page": "/word-lists",
+    "score": 96,
+    "failed": [
+      {
+        "id": "color-contrast",
+        "title": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "items": 35,
+        "nodes": [
+          {
+            "selector": "div.grid > div.flex > div.rounded-xl > h2.mb-3",
+            "snippet": "<h2 class=\"mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.74 (foreground color: #62748e, background color: #0f172b, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "div.grid > div.flex > div.rounded-xl > button.rounded-lg",
+            "snippet": "<button type=\"button\" class=\"rounded-lg border border-red-300 px-3 py-2 text-sm font-medium text-red-60…\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.73 (foreground color: #e7000b, background color: #0f172b, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "table.w-full > thead > tr.border-b > th.py-2",
+            "snippet": "<th class=\"py-2 pr-3\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.74 (foreground color: #62748e, background color: #0f172b, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "table.w-full > thead > tr.border-b > th.py-2",
+            "snippet": "<th class=\"py-2 pr-3\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.74 (foreground color: #62748e, background color: #0f172b, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "table.w-full > thead > tr.border-b > th.py-2",
+            "snippet": "<th class=\"py-2 pr-3\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.74 (foreground color: #62748e, background color: #0f172b, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "tbody > tr.border-b > td.py-2 > button.text-red-600",
+            "snippet": "<button type=\"button\" class=\"text-red-600 hover:underline disabled:opacity-50\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.73 (foreground color: #e7000b, background color: #0f172b, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "tbody > tr.border-b > td.py-2 > button.text-red-600",
+            "snippet": "<button type=\"button\" class=\"text-red-600 hover:underline disabled:opacity-50\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.73 (foreground color: #e7000b, background color: #0f172b, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "tbody > tr.border-b > td.py-2 > button.text-red-600",
+            "snippet": "<button type=\"button\" class=\"text-red-600 hover:underline disabled:opacity-50\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.73 (foreground color: #e7000b, background color: #0f172b, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "tbody > tr.border-b > td.py-2 > button.text-red-600",
+            "snippet": "<button type=\"button\" class=\"text-red-600 hover:underline disabled:opacity-50\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.73 (foreground color: #e7000b, background color: #0f172b, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "tbody > tr.border-b > td.py-2 > button.text-red-600",
+            "snippet": "<button type=\"button\" class=\"text-red-600 hover:underline disabled:opacity-50\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.73 (foreground color: #e7000b, background color: #0f172b, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      },
+      {
+        "id": "td-has-header",
+        "title": "`<td>` elements in a large `<table>` do not have table headers.",
+        "items": 1,
+        "nodes": [
+          {
+            "selector": "div.flex > div.rounded-xl > div.overflow-x-auto > table.w-full",
+            "snippet": "<table class=\"w-full text-left text-sm\">",
+            "explanation": "Fix all of the following:\n  Some non-empty data cells do not have table headers"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page": "/activities",
+    "score": 96,
+    "failed": [
+      {
+        "id": "color-contrast",
+        "title": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "items": 20,
+        "nodes": [
+          {
+            "selector": "ul.flex > li.flex > div > p.mt-0.5",
+            "snippet": "<p class=\"mt-0.5 text-xs text-slate-500\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.74 (foreground color: #62748e, background color: #0f172b, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "ul.flex > li.flex > div.flex > button.rounded-lg",
+            "snippet": "<button type=\"button\" class=\"rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-…\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.73 (foreground color: #e7000b, background color: #0f172b, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "ul.flex > li.flex > div > p.mt-0.5",
+            "snippet": "<p class=\"mt-0.5 text-xs text-slate-500\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.74 (foreground color: #62748e, background color: #0f172b, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "ul.flex > li.flex > div.flex > button.rounded-lg",
+            "snippet": "<button type=\"button\" class=\"rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-…\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.73 (foreground color: #e7000b, background color: #0f172b, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "ul.flex > li.flex > div > p.mt-0.5",
+            "snippet": "<p class=\"mt-0.5 text-xs text-slate-500\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.74 (foreground color: #62748e, background color: #0f172b, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "ul.flex > li.flex > div.flex > button.rounded-lg",
+            "snippet": "<button type=\"button\" class=\"rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-…\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.73 (foreground color: #e7000b, background color: #0f172b, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "ul.flex > li.flex > div > p.mt-0.5",
+            "snippet": "<p class=\"mt-0.5 text-xs text-slate-500\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.74 (foreground color: #62748e, background color: #0f172b, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "ul.flex > li.flex > div.flex > button.rounded-lg",
+            "snippet": "<button type=\"button\" class=\"rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-…\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.73 (foreground color: #e7000b, background color: #0f172b, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "ul.flex > li.flex > div > p.mt-0.5",
+            "snippet": "<p class=\"mt-0.5 text-xs text-slate-500\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.74 (foreground color: #62748e, background color: #0f172b, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "selector": "ul.flex > li.flex > div.flex > button.rounded-lg",
+            "snippet": "<button type=\"button\" class=\"rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-…\">",
+            "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.73 (foreground color: #e7000b, background color: #0f172b, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page": "/dashboard",
+    "score": 97,
+    "failed": [
+      {
+        "id": "link-in-text-block",
+        "title": "Links rely on color to be distinguishable.",
+        "items": 1,
+        "nodes": [
+          {
+            "selector": "div.flex > div > p.mt-1 > a.text-indigo-700",
+            "snippet": "<a class=\"text-indigo-700 hover:underline dark:text-indigo-300\" href=\"/reports\">",
+            "explanation": "Fix any of the following:\n  The link has insufficient color contrast of 1.3:1 with the surrounding text. (Minimum contrast is 3:1, link text: #a3b3ff, surrounding text: #90a1b9)\n  The link has no styling (such as underline) to distinguish it from the surrounding text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page": "/reports",
+    "score": 100,
+    "failed": []
+  },
+  {
+    "page": "/about",
+    "score": 96,
+    "failed": [
+      {
+        "id": "link-in-text-block",
+        "title": "Links rely on color to be distinguishable.",
+        "items": 2,
+        "nodes": [
+          {
+            "selector": "div.py-10 > section.mt-4 > p > a.text-indigo-700",
+            "snippet": "<a href=\"/dashboard\" class=\"text-indigo-700 hover:underline dark:text-indigo-300\">",
+            "explanation": "Fix any of the following:\n  The link has insufficient color contrast of 1.35:1 with the surrounding text. (Minimum contrast is 3:1, link text: #a3b3ff, surrounding text: #cad5e2)\n  The link has no styling (such as underline) to distinguish it from the surrounding text"
+          },
+          {
+            "selector": "div.py-10 > section.mt-4 > p > a.text-indigo-700",
+            "snippet": "<a href=\"/reports\" class=\"text-indigo-700 hover:underline dark:text-indigo-300\">",
+            "explanation": "Fix any of the following:\n  The link has insufficient color contrast of 1.35:1 with the surrounding text. (Minimum contrast is 3:1, link text: #a3b3ff, surrounding text: #cad5e2)\n  The link has no styling (such as underline) to distinguish it from the surrounding text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page": "/settings",
+    "score": 100,
+    "failed": []
+  }
+]

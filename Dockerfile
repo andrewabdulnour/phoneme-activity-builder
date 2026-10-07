@@ -50,6 +50,8 @@ COPY --from=builder   --chown=node:node /app/public       ./public
 COPY --from=builder   --chown=node:node /app/next.config.mjs ./next.config.mjs
 COPY --from=builder   --chown=node:node /app/package.json ./package.json
 COPY --from=builder   --chown=node:node /app/prisma       ./prisma
+# The seed script imports the usage simulator to create demo history.
+COPY --from=builder   --chown=node:node /app/lib/simulation.mjs ./lib/simulation.mjs
 COPY --chown=node:node docker-entrypoint.sh               ./docker-entrypoint.sh
 
 RUN chmod +x docker-entrypoint.sh \

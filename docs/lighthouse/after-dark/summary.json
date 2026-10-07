@@ -1,0 +1,47 @@
+[
+  {
+    "page": "/",
+    "score": 100,
+    "failed": []
+  },
+  {
+    "page": "/wordle",
+    "score": 100,
+    "failed": []
+  },
+  {
+    "page": "/word-search",
+    "score": 100,
+    "failed": []
+  },
+  {
+    "page": "/word-lists",
+    "score": 100,
+    "failed": []
+  },
+  {
+    "page": "/activities",
+    "score": 100,
+    "failed": []
+  },
+  {
+    "page": "/dashboard",
+    "score": 100,
+    "failed": []
+  },
+  {
+    "page": "/reports",
+    "score": 100,
+    "failed": []
+  },
+  {
+    "page": "/about",
+    "score": 100,
+    "failed": []
+  },
+  {
+    "page": "/settings",
+    "score": 100,
+    "failed": []
+  }
+]
