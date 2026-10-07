@@ -10,6 +10,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated test output (JMeter dashboards, Lighthouse and Playwright reports).
+    "docs/**",
+    "tests/load/results/**",
+    "playwright-report/**",
+    "test-results/**",
   ]),
 ]);
 

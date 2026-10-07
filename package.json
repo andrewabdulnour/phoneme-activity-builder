@@ -13,7 +13,11 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "node prisma/seed.js",
     "db:reset": "prisma migrate reset --force",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report",
+    "lighthouse": "node scripts/lighthouse-a11y.mjs"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -27,9 +31,12 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
+    "chrome-launcher": "^1.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
+    "lighthouse": "^13.5.0",
     "tailwindcss": "^4"
   },
   "allowScripts": {
