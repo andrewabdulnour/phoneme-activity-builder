@@ -1,4 +1,4 @@
-// Prisma schema for the Phoneme Activity Builder (Assessments 2 and 3).
+// Prisma schema for the Phoneme Activity Builder (Assessments 2–4).
 //
 // Data model overview:
 //   WordList  ─┬─ has many ─> Word ── has many ─> Phoneme
@@ -19,17 +19,56 @@
 // integer `position`, so multi-character IPA tokens (e.g. "tʃ", "əʉ",
 // "ɐː") are stored faithfully and their order within a word is
 // preserved without any delimiter parsing.
+//
+// Assessment 4: moved from SQLite to PostgreSQL, running as its own
+// Docker service. Fixed vocabularies (activity type, event status …)
+// are now database enums, and range rules that used to live only in
+// the Zod validation layer are also enforced by CHECK constraints in
+// the migration (see migrations/*_postgres_init/migration.sql), so bad
+// data is rejected even if it bypasses the API.
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   // `native` covers local dev (Windows/macOS/Linux); the debian target
   // is for the node:22-slim (Debian 12 / OpenSSL 3) Docker image.
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum ActivityType {
+  WORDLE
+  WORD_SEARCH
+}
+
+enum GenerationSource {
+  SAVED_ACTIVITY
+  BUILDER
+}
+
+enum GenerationStatus {
+  SUCCESS
+  FAILED
+}
+
+enum GenerationMode {
+  preview
+  download
+}
+
+enum AuditEntity {
+  WORD_LIST
+  WORD
+  ACTIVITY
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
 }
 
 /// A named collection of phoneme-based words a teacher can build
@@ -54,8 +93,8 @@ model WordList {
 
 /// A single word within a WordList, together with its ordered phonemes.
 model Word {
-  id           String    @id @default(cuid())
-  wordList     WordList   @relation(fields: [wordListId], references: [id], onDelete: Cascade)
+  id           String           @id @default(cuid())
+  wordList     WordList         @relation(fields: [wordListId], references: [id], onDelete: Cascade)
   wordListId   String
   /// English spelling, lower case (e.g. "chin").
   text         String
@@ -63,19 +102,21 @@ model Word {
   displayText  String
   /// Denormalised count of phonemes, kept in sync on write so the API
   /// can filter/group by difficulty without loading every phoneme.
-  phonemeCount Int        @default(0)
+  phonemeCount Int              @default(0)
   /// Optional teaching hint for this specific word.
   hint         String?
   /// Free-text note (not shown to students).
   notes        String?
   /// Ordering of the word within its list.
-  orderIndex   Int        @default(0)
+  orderIndex   Int              @default(0)
   phonemes     Phoneme[]
   /// Activities that use this word as their Wordle target.
   targetedBy   ActivityConfig[] @relation("ActivityTargetWord")
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
+  /// The same spelling cannot appear twice in one list.
+  @@unique([wordListId, text])
   @@index([wordListId])
 }
 
@@ -96,36 +137,35 @@ model Phoneme {
 /// A saved Wordle or Word Search configuration built on top of a
 /// WordList. Multiple configurations per list are supported.
 model ActivityConfig {
-  id           String   @id @default(cuid())
-  name         String
-  /// "WORDLE" or "WORD_SEARCH" (validated in the API layer).
-  type         String
-  wordList     WordList @relation(fields: [wordListId], references: [id], onDelete: Cascade)
-  wordListId   String
+  id             String       @id @default(cuid())
+  name           String
+  type           ActivityType
+  wordList       WordList     @relation(fields: [wordListId], references: [id], onDelete: Cascade)
+  wordListId     String
   /// Target phoneme length / difficulty for this activity (3, 4 or 5).
-  difficulty   Int      @default(3)
+  difficulty     Int          @default(3)
   /// Wordle: maximum number of guesses. Null for Word Search.
-  maxGuesses   Int?
+  maxGuesses     Int?
   /// Wordle: pre-fill the first phoneme tile as a scaffold.
-  prefillFirst Boolean  @default(false)
+  prefillFirst   Boolean      @default(false)
   /// Wordle: the target Word within the list. Null = auto-select the
   /// first word matching the difficulty. If the word is later deleted
   /// this is set back to null and the activity falls back to auto.
-  targetWord   Word?    @relation("ActivityTargetWord", fields: [targetWordId], references: [id], onDelete: SetNull)
-  targetWordId String?
+  targetWord     Word?        @relation("ActivityTargetWord", fields: [targetWordId], references: [id], onDelete: SetNull)
+  targetWordId   String?
   /// Word Search: square grid size (e.g. 8, 10, 12). Null for Wordle.
-  gridSize     Int?
+  gridSize       Int?
   /// Optional hint shown with the activity.
-  hint         String?
+  hint           String?
   /// Optional note for students shown in the generated file footer.
-  teacherNote  String?
+  teacherNote    String?
   /// Any additional generation metadata as JSON (extensible without a
   /// migration), e.g. { "wordSearchCount": 5 }.
   outputSettings Json?
   /// True when created by the usage simulator.
-  simulated    Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  simulated      Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@index([wordListId])
   @@index([type])
@@ -136,13 +176,11 @@ model ActivityConfig {
 /// Written by the server-side generate route (saved activities) and by
 /// the Wordle / Word Search builder pages via /api/telemetry/generation.
 model GenerationEvent {
-  id           String   @id @default(cuid())
-  /// "WORDLE" or "WORD_SEARCH".
-  activityType String
-  /// "SAVED_ACTIVITY" (server route) or "BUILDER" (builder pages).
-  source       String
-  /// "SUCCESS" or "FAILED".
-  status       String
+  id           String           @id @default(cuid())
+  activityType ActivityType
+  /// SAVED_ACTIVITY (server route) or BUILDER (builder pages).
+  source       GenerationSource
+  status       GenerationStatus
   /// Why a failed attempt failed (null on success).
   errorMessage String?
   /// Saved activity / word list behind the attempt, when known.
@@ -150,14 +188,14 @@ model GenerationEvent {
   wordListId   String?
   /// Phoneme length of the activity (3, 4, 5 …).
   difficulty   Int?
-  /// "preview" (opened in the browser) or "download" (saved as a file).
-  mode         String   @default("preview")
+  /// preview (opened in the browser) or download (saved as a file).
+  mode         GenerationMode   @default(preview)
   /// Server-side time spent building the file.
-  durationMs   Int      @default(0)
+  durationMs   Int              @default(0)
   /// Size of the generated HTML file in bytes (null on failure).
   outputBytes  Int?
-  simulated    Boolean  @default(false)
-  createdAt    DateTime @default(now())
+  simulated    Boolean          @default(false)
+  createdAt    DateTime         @default(now())
 
   @@index([createdAt])
   @@index([status])
@@ -182,18 +220,16 @@ model PageView {
 /// Append-only audit trail of builder CRUD operations, so creation
 /// counts stay accurate even after records are deleted.
 model AuditEvent {
-  id           String   @id @default(cuid())
-  /// "WORD_LIST", "WORD" or "ACTIVITY".
-  entityType   String
-  /// "CREATE", "UPDATE" or "DELETE".
-  action       String
+  id           String        @id @default(cuid())
+  entityType   AuditEntity
+  action       AuditAction
   entityId     String
   /// Human-readable name of the record at the time of the change.
   label        String?
-  /// For activities: "WORDLE" or "WORD_SEARCH".
-  activityType String?
-  simulated    Boolean  @default(false)
-  createdAt    DateTime @default(now())
+  /// Set for activities only.
+  activityType ActivityType?
+  simulated    Boolean       @default(false)
+  createdAt    DateTime      @default(now())
 
   @@index([createdAt])
   @@index([entityType, action])
