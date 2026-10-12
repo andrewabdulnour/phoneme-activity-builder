@@ -1,11 +1,8 @@
 # Phoneme Activity Builder — multi-service Docker Compose setup.
 #
 #   docker compose up --build              db + migrate + app
-#   docker compose --profile tools up      … plus Adminer (DB browser)
 #
-# Then open http://localhost:3000 (app), http://localhost:3000/health
-# and, with the tools profile, http://localhost:8080 (Adminer: server
-# "db", user/password/database "phoneme").
+# Then open http://localhost:3000 (app) and http://localhost:3000/health.
 #
 # Services
 #   db       PostgreSQL 17. Data lives on the `pgdata` named volume so it
@@ -15,7 +12,6 @@
 #   app      Next.js server — the React frontend and the REST API route
 #            handlers (/api/*, /health). Starts only after the database
 #            is healthy and the migrate job has finished successfully.
-#   adminer  Optional web UI for inspecting the database (tools profile).
 #
 # Startup order is enforced with healthchecks rather than sleeps:
 #   db (healthy) → migrate (completed successfully) → app (healthy)
@@ -68,17 +64,6 @@ services:
       migrate:
         condition: service_completed_successfully
     restart: unless-stopped
-
-  adminer:
-    image: adminer:5
-    profiles: ["tools"]
-    ports:
-      - "8080:8080"
-    environment:
-      ADMINER_DEFAULT_SERVER: db
-    depends_on:
-      db:
-        condition: service_healthy
 
 volumes:
   pgdata:

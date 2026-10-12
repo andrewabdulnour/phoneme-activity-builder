@@ -26,7 +26,7 @@ Each change responds to written feedback on an earlier submission.
 
 | Feedback (assessment) | Change | Where |
 | --- | --- | --- |
-| Docker ran one service with SQLite, not separate services (A2) | PostgreSQL 17 now runs as its own `db` service; a one-shot `migrate` job applies migrations and seeds; the `app` service starts only once both succeed (healthcheck-ordered). Optional Adminer service for inspecting the database. | `docker-compose.yml`, `Dockerfile`, `docker-entrypoint.sh` |
+| Docker ran one service with SQLite, not separate services (A2) | PostgreSQL 17 now runs as its own `db` service; a one-shot `migrate` job applies migrations and seeds; the `app` service starts only once both succeed (healthcheck-ordered). | `docker-compose.yml`, `Dockerfile`, `docker-entrypoint.sh` |
 | Database-level constraints could be stronger (A2) | Fixed vocabularies are Postgres **enums**; **CHECK** constraints enforce difficulty, grid size and guess ranges, type-specific settings and "a failed generation has a reason"; a word's spelling is **unique within its list**. | `prisma/schema.prisma`, `prisma/migrations/*_postgres_init` |
 | Cross-entity and edge-case validation (A2) | An activity's target word must belong to its word list; moving an activity to another list clears a stale target; Wordle-only / Word-Search-only settings are rejected on the wrong type; database rule violations return 400/409, never 500. | `lib/activities.js`, `lib/apiResponse.js` |
 | Legacy hard-coded logic remained (A2) | The second, hard-coded copy of the 90-word corpus is gone; the builder pages read every word from the database. | `lib/phonemeData.js`, `lib/useWordLists.js`, `app/wordle`, `app/word-search` |
@@ -160,7 +160,6 @@ npm run db:reset      # drop, re-migrate and re-seed
 
 ```bash
 docker compose up --build                 # db + migrate + app
-docker compose --profile tools up -d      # … plus Adminer on http://localhost:8080
 ```
 
 Then open <http://localhost:3000> and <http://localhost:3000/health>.
@@ -170,8 +169,6 @@ Then open <http://localhost:3000> and <http://localhost:3000/health>.
 | `db` | `postgres:17-alpine` | PostgreSQL; data on the `pgdata` named volume, `pg_isready` healthcheck |
 | `migrate` | app image, `migrate` command | One-shot: `prisma migrate deploy`, then seeds **only if the database is empty**; exits |
 | `app` | app image, `start` command | Next.js frontend + API on :3000; non-root, `HEALTHCHECK` against `/health` |
-| `adminer` | `adminer:5` (tools profile) | Optional database browser (server `db`, user/password/database `phoneme`) |
-
 Startup is ordered by health, not sleeps: `db` healthy → `migrate` completed
 successfully → `app` starts. Teacher edits survive `docker compose down` / `up`;
 `docker compose down -v` wipes the volume for a fresh, re-seeded start.
