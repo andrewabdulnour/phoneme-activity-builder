@@ -1,5 +1,10 @@
 # Testing — Assessment 3
 
+> **Note (Assessment 4):** the JMeter and Lighthouse results below were measured on the
+> Assessment 3 build, which used SQLite (including the WAL setting mentioned in the load-test
+> discussion). Assessment 4 moved the database to PostgreSQL. The Playwright suite has since
+> grown to 15 tests and passes on the PostgreSQL build, both locally and in Docker.
+
 Three kinds of testing were used, each answering a different question:
 
 | Tool | Question it answers | Where |
