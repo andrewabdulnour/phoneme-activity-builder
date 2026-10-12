@@ -1,6 +1,6 @@
   # Phoneme Activity Builder
 
-**Assessment 3 — Data-driven dashboard, observability and testing**
+**Assessment 4 — Testing, performance and technical defence (final integrated system)**
 Andrew Abdulnour — Student No. 20719271
 GitHub: https://github.com/andrewabdulnour/phoneme-activity-builder
 
@@ -16,7 +16,31 @@ the backend, database, API, validation, and Docker packaging that make the build
 data-driven and reproducible. **Assessment 3** (this stage) turns it into a monitored,
 reportable system: every generation, page visit and builder change is stored, then
 summarised on a live **dashboard**, a **reports** view, and a set of **alerts** — and the
-whole system is tested with **Playwright**, **JMeter** and **Lighthouse**.
+whole system is tested with **Playwright**, **JMeter** and **Lighthouse**. **Assessment 4**
+brings it together for the live demonstration and addresses the marker feedback from the
+earlier stages (below).
+
+## Assessment 4: what changed and why
+
+Each change responds to written feedback on an earlier submission.
+
+| Feedback (assessment) | Change | Where |
+| --- | --- | --- |
+| Docker ran one service with SQLite, not separate services (A2) | PostgreSQL 17 now runs as its own `db` service; a one-shot `migrate` job applies migrations and seeds; the `app` service starts only once both succeed (healthcheck-ordered). Optional Adminer service for inspecting the database. | `docker-compose.yml`, `Dockerfile`, `docker-entrypoint.sh` |
+| Database-level constraints could be stronger (A2) | Fixed vocabularies are Postgres **enums**; **CHECK** constraints enforce difficulty, grid size and guess ranges, type-specific settings and "a failed generation has a reason"; a word's spelling is **unique within its list**. | `prisma/schema.prisma`, `prisma/migrations/*_postgres_init` |
+| Cross-entity and edge-case validation (A2) | An activity's target word must belong to its word list; moving an activity to another list clears a stale target; Wordle-only / Word-Search-only settings are rejected on the wrong type; database rule violations return 400/409, never 500. | `lib/activities.js`, `lib/apiResponse.js` |
+| Legacy hard-coded logic remained (A2) | The second, hard-coded copy of the 90-word corpus is gone; the builder pages read every word from the database. | `lib/phonemeData.js`, `lib/useWordLists.js`, `app/wordle`, `app/word-search` |
+| Duplicated logic (A2) | Activity defaults, word-picking rules and labels live in one module shared by browser and server (they had drifted: a 3-phoneme Wordle got 7 guesses in the builder but 5 when saved). Shared form styles and word-creation helper. | `lib/activityRules.js`, `components/forms.js`, `lib/wordLists.js` |
+| Teachers could not choose their own words (A1) | Teachers tick exactly which words go into a Word Search (builder and saved activities), and set Wordle guesses and first-phoneme pre-fill. Teachers add their own words on Word Lists. | `components/WordPicker.js` |
+| Theme used utilities + direct DOM writes, not a provider (A1) | `ThemeProvider` React context owns theme and layout density; "System" follows OS changes live. | `components/ThemeProvider.js` |
+| Not every control had the same hover feedback (A1) | One shared set of control styles with hover and focus states. | `components/forms.js` |
+| Few commits (A1) | Work is committed in small, described steps on the `assessment-4` branch. | `git log` |
+
+Why the frontend and API are still one service: the dashboard and reports pages are React
+Server Components that call the same data functions as the API directly, so splitting them
+into separate containers would add a network hop and duplicate the data layer without a
+real benefit at classroom scale. The database — the piece with different scaling,
+backup and lifecycle needs — is the part that was separated.
 
 ## Assessment 3 at a glance
 
@@ -28,7 +52,7 @@ whole system is tested with **Playwright**, **JMeter** and **Lighthouse**.
 | Reporting views — 7 / 30 / 90-day charts and tables, CSV export | `/reports`, `GET /api/reports`, `GET /api/reports/export` |
 | Simulated input records, stored in the database | `lib/simulation.mjs`, `POST /api/simulate`, seed script |
 | Server-side monitoring | `GET /api/metrics` (JSON or Prometheus format) |
-| Playwright — builder CRUD and generate/play use cases | `tests/e2e/` — 8 / 8 passing |
+| Playwright — builder CRUD and generate/play use cases | `tests/e2e/` — 15 / 15 passing (7 added in Assessment 4) |
 | JMeter — x1, x10, x100, x1000, x10000 users | `tests/load/`, results in `docs/load-testing/` |
 | Lighthouse accessibility, before and after | `scripts/lighthouse-a11y.mjs`, reports in `docs/lighthouse/` |
 
@@ -41,7 +65,7 @@ The full testing write-up, with the load-test analysis and the accessibility cha
 Teacher (builder pages)                     Student (generated .html file)
    │  create / edit / delete                       ▲
    ▼                                               │ generate (preview / download)
-REST API route handlers ──► Prisma ──► SQLite ──────┘
+REST API route handlers ──► Prisma ──► PostgreSQL ──┘
    │  every request timed          │  WordList, Word, Phoneme, ActivityConfig
    ▼                               │  GenerationEvent, PageView, AuditEvent
 lib/metrics.js (in memory)         ▼
@@ -84,11 +108,14 @@ npm run lighthouse -- --label after --theme light   # Lighthouse accessibility a
 
 | | Result |
 | --- | --- |
-| Playwright | 8 / 8 tests pass: word-list CRUD, activity CRUD, generating and playing a Wordle and a Word Search, downloading from the builder, health and alerts |
-| JMeter | No errors and sub-50 ms responses from x1 to x1000; at x10000 users, 2.7 % of requests failed with connection resets from the single-machine setup's network limits, and the app logged no server errors |
+| Playwright | 15 / 15 tests pass (local dev server and the Docker production stack): word-list CRUD, activity CRUD, generating and playing a Wordle and a Word Search, downloading from the builder, health and alerts, plus (A4) data-integrity rules, the Word Search word picker and the theme provider |
+| JMeter (A3, SQLite build) | No errors and sub-50 ms responses from x1 to x1000; at x10000 users, 2.7 % of requests failed with connection resets from the single-machine setup's network limits, and the app logged no server errors |
 | Lighthouse | Accessibility average went from 96 to **100**, with all 9 pages at 100 in both light and dark mode |
 
-See [`docs/TESTING.md`](docs/TESTING.md) for method, full results and discussion.
+See [`docs/TESTING.md`](docs/TESTING.md) for method, full results and discussion. The JMeter
+figures were measured in Assessment 3, before the move to PostgreSQL; the load-test server
+script now targets a separate `phoneme_loadtest` Postgres database so the run can be
+repeated on the current stack.
 
 ## Stack
 
@@ -97,20 +124,25 @@ See [`docs/TESTING.md`](docs/TESTING.md) for method, full results and discussion
 | Framework          | Next.js 16 (App Router) — `npx create-next-app`                   |
 | Language / UI      | React 19, Tailwind CSS v4                                        |
 | API                | Next.js Route Handlers (`app/**/route.js`)                       |
-| ORM / database     | Prisma 6 + SQLite (file-based; volume-mounted in Docker)         |
+| ORM / database     | Prisma 6 + PostgreSQL 17 (own Docker service, named volume)      |
 | Validation         | Zod                                                              |
-| Packaging          | Multi-stage `Dockerfile` + `docker-compose.yml`                  |
+| Packaging          | Multi-stage `Dockerfile` + `docker-compose.yml` (db, migrate, app) |
 
-SQLite keeps the whole system in one reproducible container with no external database
-service to provision, which suits a single-tenant classroom tool; the Prisma schema is
-portable to Postgres later by changing the datasource `provider`.
+Assessments 2 and 3 used SQLite, which kept everything in one container. Assessment 4
+moves to PostgreSQL: concurrent writes no longer queue on a single file lock (relevant
+because every generation and page view is also an INSERT), the database runs and is
+backed up independently of the app, and Postgres enums and CHECK constraints let the
+database itself reject invalid data. Because all data access goes through Prisma, the
+switch needed a new baseline migration and the removal of one SQLite-only PRAGMA — no
+query changes.
 
 ## Getting started (local)
 
 ```bash
-cp .env.example .env          # DATABASE_URL="file:./dev.db"
+cp .env.example .env          # DATABASE_URL=postgresql://phoneme:phoneme@localhost:5432/phoneme
+docker compose up -d db       # start just PostgreSQL (published on localhost:5432)
 npm install                   # also runs `prisma generate`
-npm run db:migrate            # create the SQLite database + schema
+npm run db:deploy             # apply the migrations
 npm run db:seed               # load the 90-word HCE corpus + sample activities
 npm run dev                   # http://localhost:3000
 ```
@@ -127,16 +159,22 @@ npm run db:reset      # drop, re-migrate and re-seed
 ## Run in Docker
 
 ```bash
-docker compose up --build
+docker compose up --build                 # db + migrate + app
+docker compose --profile tools up -d      # … plus Adminer on http://localhost:8080
 ```
 
 Then open <http://localhost:3000> and <http://localhost:3000/health>.
 
-The container entrypoint (`docker-entrypoint.sh`) runs `prisma migrate deploy`, seeds the
-database **only if it is empty**, then starts `next start`. The SQLite file lives on the
-`phoneme-data` named volume (`/app/data/prod.db`), so teacher edits survive
-`docker compose down` / `up`. The image runs as a non-root user and declares a
-`HEALTHCHECK` against `/health`.
+| Service | Image | Role |
+| --- | --- | --- |
+| `db` | `postgres:17-alpine` | PostgreSQL; data on the `pgdata` named volume, `pg_isready` healthcheck |
+| `migrate` | app image, `migrate` command | One-shot: `prisma migrate deploy`, then seeds **only if the database is empty**; exits |
+| `app` | app image, `start` command | Next.js frontend + API on :3000; non-root, `HEALTHCHECK` against `/health` |
+| `adminer` | `adminer:5` (tools profile) | Optional database browser (server `db`, user/password/database `phoneme`) |
+
+Startup is ordered by health, not sleeps: `db` healthy → `migrate` completed
+successfully → `app` starts. Teacher edits survive `docker compose down` / `up`;
+`docker compose down -v` wipes the volume for a fresh, re-seeded start.
 
 ## API
 
@@ -176,7 +214,11 @@ All responses are JSON. Errors have the shape `{ "error": string, "details"?: [.
   `WORDLE` / `WORD_SEARCH`, numeric ranges on difficulty / grid size / guesses.
 - Phoneme symbols are checked against the HCE IPA inventory; an unrecognised symbol is
   rejected with a message naming it (`?allowUnknownPhonemes=true` overrides).
-- Malformed JSON → `400`; unknown id → `404`; unique-constraint clash → `409`; any
+- Cross-entity rules (Assessment 4): a Wordle's target word must be in the activity's
+  word list, settings for the other activity type are rejected, and moving an activity to
+  another list clears its old target word. Updates are checked against the merged record.
+- Malformed JSON → `400`; unknown id → `404`; unique-constraint clash (e.g. the same word
+  twice in a list) → `409`; foreign-key or CHECK-constraint violation → `400`; any
   unexpected error is caught and returned as a generic `500` without a stack trace
   (`withErrorHandling` in `lib/apiResponse.js`).
 - Generating an activity whose word list is empty → `400` with a clear message.
@@ -199,6 +241,12 @@ WordList ─┬─< Word ─< Phoneme
 
 `onDelete: Cascade` throughout, so deleting a list cleans up its words, phonemes and
 activities.
+
+Database-level rules (Assessment 4, PostgreSQL): `type`, `status`, `source`, `mode`,
+`entityType` and `action` are enums; CHECK constraints keep difficulty and phoneme length
+in 2–12, grid size in 5–20 and guesses in 1–12, forbid a grid size on a Wordle or a guess
+limit / target word on a Word Search, and require an error message on (and only on) a
+failed generation; `(wordListId, text)` is unique on `Word`.
 
 Assessment 3 adds three append-only event tables for reporting and observability:
 
@@ -277,8 +325,9 @@ docs/                  TESTING.md, Lighthouse reports, JMeter results
 phoneme from the database, then feeds them into the same dependency-free generators from
 Assessment 1 (`lib/generateWordleHtml.js`, `lib/generateWordSearchHtml.js`). Editing a
 word list — adding words, changing a phoneme — changes what the next generated file
-contains. The Wordle and Word Search builder pages can also switch their word pool from the
-fixed corpus to any saved list.
+contains. Since Assessment 4 the Wordle and Word Search builder pages also read their words
+only from saved lists (the seed loads the HCE corpus as three lists), and both the pages
+and the saved-activity route apply the same rules from `lib/activityRules.js`.
 
 ## AI acknowledgement
 
@@ -297,8 +346,11 @@ Apache Software Foundation. (2026). *Apache JMeter user's manual*. Retrieved Sep
 Beyer, B., Jones, C., Petoff, J., & Murphy, N. R. (Eds.). (2016). *Site reliability
 engineering: How Google runs production systems*. O'Reilly Media.
 
-Docker Inc. (2026). *Building best practices*. Docker documentation. Retrieved September 1,
+Docker Inc. (2026a). *Building best practices*. Docker documentation. Retrieved September 1,
 2026, from https://docs.docker.com/build/building/best-practices/
+
+Docker Inc. (2026b). *Control startup and shutdown order in Compose*. Docker documentation.
+Retrieved October 12, 2026, from https://docs.docker.com/compose/how-tos/startup-order/
 
 Few, S. (2006). *Information dashboard design: The effective visual communication of
 data*. O'Reilly Media.
@@ -326,7 +378,13 @@ https://playwright.dev/docs/intro
 Molyneaux, I. (2014). *The art of application performance testing* (2nd ed.). O'Reilly
 Media.
 
+Meta Platforms, Inc. (2026). *Passing data deeply with context*. React documentation.
+Retrieved October 12, 2026, from https://react.dev/learn/passing-data-deeply-with-context
+
 Nielsen, J. (1994). *Usability engineering*. Morgan Kaufmann.
+
+PostgreSQL Global Development Group. (2026). *Constraints*. PostgreSQL documentation.
+Retrieved October 12, 2026, from https://www.postgresql.org/docs/current/ddl-constraints.html
 
 Prisma Data, Inc. (2026). *Prisma ORM: Schema and relations*. Prisma documentation.
 Retrieved September 1, 2026, from https://www.prisma.io/docs/orm/prisma-schema

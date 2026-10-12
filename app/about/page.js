@@ -13,10 +13,18 @@ export default function AboutPage() {
 
       <section className="mt-4 max-w-3xl space-y-3 text-slate-600 dark:text-slate-300">
         <p>
-          This is <strong>Assessment 3: Data-driven web application and reporting</strong> for a
-          phoneme activity builder aimed at Speech Pathology students and teachers. It continues
-          directly from Assessment 1 (frontend design and usability) and Assessment 2 (backend,
-          database and Docker).
+          This is the final version (<strong>Assessment 4</strong>) of a phoneme activity builder
+          for Speech Pathology students and teachers. It brings together Assessment 1 (frontend
+          design and usability), Assessment 2 (backend, database and Docker) and Assessment 3
+          (dashboard, observability and testing).
+        </p>
+        <p>
+          <strong>Assessment 4 acts on the marker feedback from earlier stages.</strong> The
+          database is now PostgreSQL in its own Docker service, with enums and CHECK constraints so
+          the database itself rejects invalid data; the API checks cross-record rules (a Wordle&apos;s
+          target word must belong to its word list); the builder pages read every word from the
+          database instead of a second hard-coded copy; teachers choose exactly which words go into
+          a Word Search; and theme preferences are managed by a React context provider.
         </p>
         <p>
           <strong>Assessment 3 adds observability and reporting.</strong> Every activity generation
@@ -33,7 +41,7 @@ export default function AboutPage() {
         <p>
           <strong>Assessment 2 added the backend and database layer.</strong> Teachers create and
           manage phoneme-based word lists and saved activity configurations, all persisted through a
-          Prisma + SQLite database and a REST API (<code>/api/word-lists</code>,{" "}
+          Prisma ORM database (SQLite at the time, PostgreSQL since Assessment 4) and a REST API (<code>/api/word-lists</code>,{" "}
           <code>/api/words</code>, <code>/api/activities</code>). The Wordle and Word Search
           downloads can now be generated from stored data rather than a single hard-coded example,
           and the whole app runs inside a Docker container with a <code>/health</code> check.
@@ -46,9 +54,9 @@ export default function AboutPage() {
           downloadable HTML file that runs in any browser.
         </p>
         <p>
-          The on-screen phoneme keyboard, IPA transcriptions and word corpus (90 words across 3, 4
-          and 5-phoneme sets) follow the unit&apos;s HCE (broad Australian English) phoneme
-          materials. Phoneme length doubles as the difficulty control — more phonemes to blend or
+          The on-screen phoneme keyboard, IPA transcriptions and starter word corpus (90 words
+          across 3, 4 and 5-phoneme lists, loaded into the database by the seed) follow the
+          unit&apos;s HCE (broad Australian English) phoneme materials. Phoneme length doubles as the difficulty control — more phonemes to blend or
           segment is a developmentally meaningful difficulty axis for speech pathology practice,
           rather than an arbitrary guess limit.
         </p>
