@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, describeError } from "@/lib/apiClient";
+import { Alert, CARD, INPUT, BTN_PRIMARY } from "./forms";
 import {
   ACTIVITY_TYPE_LABEL,
   DEFAULT_GRID_SIZE,
@@ -10,22 +11,6 @@ import {
   wordleDefaults,
 } from "@/lib/activityRules";
 import WordPicker from "./WordPicker";
-
-const CARD =
-  "rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900";
-const INPUT =
-  "rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100";
-const BTN_PRIMARY =
-  "rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50";
-
-function Alert({ children }) {
-  if (!children) return null;
-  return (
-    <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
-      {children}
-    </p>
-  );
-}
 
 // Problems with a saved activity that mean its generated file will fail
 // or not be what the teacher expects. Mirrors the dashboard alert rules.

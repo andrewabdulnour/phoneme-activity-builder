@@ -1,68 +1,46 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import WordleGame from "@/components/WordleGame";
-import { PHONEME_LENGTHS, getWordsByLength, getWord } from "@/lib/phonemeData";
+import { Alert, BTN_PRIMARY, CARD, FIELD_LABEL, INPUT, LINK } from "@/components/forms";
 import { generateWordleHtml } from "@/lib/generateWordleHtml";
 import { downloadHtmlFile } from "@/lib/download";
-import { api } from "@/lib/apiClient";
 import { generateWithTelemetry } from "@/lib/generationTelemetry";
-
-const CORPUS = "__corpus__";
+import { defaultListFor, useWordLists } from "@/lib/useWordLists";
+import {
+  DIFFICULTY_LEVELS,
+  slugify,
+  toGeneratorWord,
+  wordleDefaults,
+  wordsAtLength,
+} from "@/lib/activityRules";
 
 export default function WordleBuilderPage() {
+  const { lists, loading, error } = useWordLists();
   const [length, setLength] = useState(3);
-  const [wordName, setWordName] = useState(getWordsByLength(3)[0].word);
+  const [listId, setListId] = useState("");
+  const [wordId, setWordId] = useState("");
+  const [scaffold, setScaffold] = useState(() => wordleDefaults(3));
   const [teacherNote, setTeacherNote] = useState("");
   const [generateError, setGenerateError] = useState("");
 
-  // Optional: pull the word pool from a saved database word list instead
-  // of the fixed HCE corpus (Assessment 2 integration).
-  const [source, setSource] = useState(CORPUS);
-  const [lists, setLists] = useState([]);
+  // Everything below is derived from the loaded lists plus the teacher's
+  // choices, so there is no second copy of the words to keep in sync.
+  const list = lists.find((l) => l.id === listId) ?? defaultListFor(lists, length);
+  const wordOptions = list ? wordsAtLength(list.words, length) : [];
+  const target = wordOptions.find((w) => w.id === wordId) ?? wordOptions[0] ?? null;
+  const word = target ? toGeneratorWord(target) : null;
 
-  useEffect(() => {
-    api
-      .get("/api/word-lists")
-      .then(({ wordLists }) => setLists(wordLists))
-      .catch(() => setLists([]));
-  }, []);
-
-  const activeList = lists.find((l) => l.id === source) ?? null;
-
-  const wordOptions = useMemo(() => {
-    if (!activeList) return getWordsByLength(length);
-    const atLength = activeList.words.filter((w) => w.phonemes.length === length);
-    return (atLength.length ? atLength : activeList.words).map((w) => ({
-      word: w.text,
-      display: w.display,
-      phonemes: w.phonemes,
-    }));
-  }, [activeList, length]);
-
-  const word =
-    wordOptions.find((w) => w.word === wordName) ?? wordOptions[0] ?? getWord(length, wordName);
-
-  function handleLengthChange(nextLength) {
-    setLength(nextLength);
-    const next = activeList
-      ? (activeList.words.filter((w) => w.phonemes.length === nextLength)[0] ??
-          activeList.words[0])
-      : null;
-    setWordName(next ? next.text : getWordsByLength(nextLength)[0].word);
+  function handleLengthChange(next) {
+    setLength(next);
+    setWordId("");
+    setScaffold(wordleDefaults(next));
   }
 
-  function handleSourceChange(next) {
-    setSource(next);
-    const list = lists.find((l) => l.id === next);
-    if (list) {
-      const first =
-        list.words.filter((w) => w.phonemes.length === length)[0] ?? list.words[0];
-      setWordName(first ? first.text : "");
-    } else {
-      setWordName(getWordsByLength(length)[0].word);
-    }
+  function handleListChange(next) {
+    setListId(next);
+    setWordId("");
   }
 
   function handleGenerate() {
@@ -70,11 +48,18 @@ export default function WordleBuilderPage() {
     try {
       const html = generateWithTelemetry({
         activityType: "WORDLE",
-        wordListId: activeList?.id,
+        wordListId: list?.id,
         difficulty: word.phonemes.length,
-        build: () => generateWordleHtml({ word, length: word.phonemes.length, teacherNote }),
+        build: () =>
+          generateWordleHtml({
+            word,
+            length: word.phonemes.length,
+            teacherNote,
+            maxGuesses: scaffold.maxGuesses,
+            prefillFirst: scaffold.prefillFirst,
+          }),
       });
-      downloadHtmlFile(`phoneme-wordle-${word.word}.html`, html);
+      downloadHtmlFile(`phoneme-wordle-${slugify(word.word)}.html`, html);
     } catch (err) {
       setGenerateError(`Could not generate the Wordle file: ${err.message}`);
     }
@@ -84,28 +69,31 @@ export default function WordleBuilderPage() {
     <div className="py-8">
       <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Build a Wordle activity</h1>
       <p className="mt-1 max-w-2xl text-slate-600 dark:text-slate-400">
-        Choose a phoneme length (the difficulty) and a target word, preview the phoneme Wordle, then
-        generate a downloadable version. Words come from the fixed HCE corpus, or from a{" "}
-        <Link href="/word-lists" className="text-indigo-700 underline underline-offset-2 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">
-          saved word list
-        </Link>
-        . To save reusable configurations, use the{" "}
-        <Link href="/activities" className="text-indigo-700 underline underline-offset-2 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">
+        Choose a word list, a phoneme length (the difficulty) and a target word, preview the
+        phoneme Wordle, then generate a downloadable version. Add your own words on the{" "}
+        <Link href="/word-lists" className={LINK}>
+          Word Lists
+        </Link>{" "}
+        page, or save reusable configurations on the{" "}
+        <Link href="/activities" className={LINK}>
           Activities
         </Link>{" "}
         page.
       </p>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[18rem_1fr]">
-        <aside className="flex flex-col gap-5 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <aside className={`${CARD} flex flex-col gap-5`}>
+          <Alert>{error && `Could not load word lists: ${error}`}</Alert>
+
           <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Word source</span>
+            <span className={FIELD_LABEL}>Word list</span>
             <select
-              value={source}
-              onChange={(e) => handleSourceChange(e.target.value)}
-              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+              value={list?.id ?? ""}
+              onChange={(e) => handleListChange(e.target.value)}
+              disabled={loading || !lists.length}
+              className={INPUT}
             >
-              <option value={CORPUS}>Fixed HCE corpus (90 words)</option>
+              {loading && <option value="">Loading…</option>}
               {lists.map((l) => (
                 <option key={l.id} value={l.id}>
                   {l.name} ({l.wordCount} words)
@@ -115,67 +103,83 @@ export default function WordleBuilderPage() {
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-              Difficulty (phoneme length)
-            </span>
+            <span className={FIELD_LABEL}>Difficulty (phoneme length)</span>
             <select
               value={length}
               onChange={(e) => handleLengthChange(Number(e.target.value))}
-              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+              className={INPUT}
             >
-              {Object.entries(PHONEME_LENGTHS).map(([len, d]) => (
-                <option key={len} value={len}>
-                  {d.label} — {d.maxGuesses} guesses
+              {DIFFICULTY_LEVELS.map((d) => (
+                <option key={d.length} value={d.length}>
+                  {d.label}
                 </option>
               ))}
             </select>
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Target word</span>
+            <span className={FIELD_LABEL}>Target word</span>
             <select
-              value={word?.word ?? ""}
-              onChange={(e) => setWordName(e.target.value)}
-              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+              value={target?.id ?? ""}
+              onChange={(e) => setWordId(e.target.value)}
+              disabled={!wordOptions.length}
+              className={INPUT}
             >
               {wordOptions.map((w) => (
-                <option key={w.word} value={w.word}>
+                <option key={w.id} value={w.id}>
                   {w.display} — {w.phonemes.map((p) => `/${p}/`).join(" ")}
                 </option>
               ))}
             </select>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
-              {wordOptions.length} words available
-              {activeList ? ` from "${activeList.name}"` : " from the fixed HCE corpus"}.
-            </span>
+            {list && (
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                {wordOptions.length} words available from &quot;{list.name}&quot;.
+              </span>
+            )}
           </label>
 
+          <div className="grid grid-cols-2 gap-3">
+            <label className="flex flex-col gap-1.5">
+              <span className={FIELD_LABEL}>Guesses</span>
+              <input
+                type="number"
+                min={1}
+                max={12}
+                value={scaffold.maxGuesses}
+                onChange={(e) =>
+                  setScaffold((s) => ({
+                    ...s,
+                    maxGuesses: Math.min(12, Math.max(1, Number(e.target.value) || 1)),
+                  }))
+                }
+                className={INPUT}
+              />
+            </label>
+            <label className="mt-6 flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+              <input
+                type="checkbox"
+                checked={scaffold.prefillFirst}
+                onChange={(e) => setScaffold((s) => ({ ...s, prefillFirst: e.target.checked }))}
+              />
+              Pre-fill first phoneme
+            </label>
+          </div>
+
           <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-              Note for students (optional)
-            </span>
+            <span className={FIELD_LABEL}>Note for students (optional)</span>
             <input
               type="text"
               value={teacherNote}
               onChange={(e) => setTeacherNote(e.target.value)}
               placeholder="e.g. Focus on the TH sound today"
-              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+              className={INPUT}
             />
           </label>
 
-          <button
-            type="button"
-            onClick={handleGenerate}
-            disabled={!word}
-            className="mt-2 rounded-lg bg-indigo-600 px-4 py-2.5 font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
-          >
+          <button type="button" onClick={handleGenerate} disabled={!word} className={`mt-2 ${BTN_PRIMARY}`}>
             Generate .html file
           </button>
-          {generateError && (
-            <p role="alert" className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
-              {generateError}
-            </p>
-          )}
+          <Alert>{generateError}</Alert>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Downloads a single, self-contained HTML page you can open in any browser or share with
             students.
@@ -184,9 +188,16 @@ export default function WordleBuilderPage() {
 
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950 sm:p-8">
           {word ? (
-            <WordleGame key={`${source}-${word.word}-${word.phonemes.length}`} word={word} length={word.phonemes.length} />
+            <WordleGame
+              key={`${target.id}-${scaffold.maxGuesses}-${scaffold.prefillFirst}`}
+              word={word}
+              maxGuesses={scaffold.maxGuesses}
+              prefillFirst={scaffold.prefillFirst}
+            />
           ) : (
-            <p className="text-sm text-slate-600 dark:text-slate-400">This word list has no words yet.</p>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              {loading ? "Loading words…" : "This word list has no words yet."}
+            </p>
           )}
         </div>
       </div>
