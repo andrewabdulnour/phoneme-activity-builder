@@ -2,6 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, describeError } from "@/lib/apiClient";
+import {
+  ACTIVITY_TYPE_LABEL,
+  DEFAULT_GRID_SIZE,
+  DEFAULT_WORD_SEARCH_COUNT,
+  GRID_SIZES,
+  wordleDefaults,
+} from "@/lib/activityRules";
+import WordPicker from "./WordPicker";
 
 const CARD =
   "rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900";
@@ -18,8 +26,6 @@ function Alert({ children }) {
     </p>
   );
 }
-
-const TYPE_LABEL = { WORDLE: "Wordle", WORD_SEARCH: "Word Search" };
 
 // Problems with a saved activity that mean its generated file will fail
 // or not be what the teacher expects. Mirrors the dashboard alert rules.
@@ -50,13 +56,25 @@ export default function ActivityManager() {
     type: "WORDLE",
     wordListId: "",
     difficulty: 3,
-    maxGuesses: 7,
-    prefillFirst: true,
-    gridSize: 10,
+    ...wordleDefaults(3),
+    gridSize: DEFAULT_GRID_SIZE,
     targetWordId: "",
+    wordIds: [],
     teacherNote: "",
   });
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  // A target word / chosen words belong to one list, so switching lists
+  // clears them (the API rejects a target word from a different list).
+  function setWordList(id) {
+    setForm((f) => ({ ...f, wordListId: id, targetWordId: "", wordIds: [] }));
+  }
+
+  // Changing difficulty resets the Wordle scaffolding to the shared
+  // defaults for that length; the teacher can still override them.
+  function setDifficulty(value) {
+    setForm((f) => ({ ...f, difficulty: value, ...wordleDefaults(Number(value)) }));
+  }
 
   const refresh = useCallback(async () => {
     setError("");
@@ -103,9 +121,10 @@ export default function ActivityManager() {
         if (form.targetWordId) payload.targetWordId = form.targetWordId;
       } else {
         payload.gridSize = Number(form.gridSize);
+        if (form.wordIds.length) payload.outputSettings = { wordIds: form.wordIds };
       }
       await api.post("/api/activities", payload);
-      setForm((f) => ({ ...f, name: "", teacherNote: "", targetWordId: "" }));
+      setForm((f) => ({ ...f, name: "", teacherNote: "", targetWordId: "", wordIds: [] }));
       await refresh();
     } catch (err) {
       setError(describeError(err));
@@ -171,7 +190,7 @@ export default function ActivityManager() {
                 <select
                   className={INPUT}
                   value={form.wordListId}
-                  onChange={(e) => set("wordListId", e.target.value)}
+                  onChange={(e) => setWordList(e.target.value)}
                 >
                   {lists.map((l) => (
                     <option key={l.id} value={l.id}>
@@ -187,7 +206,7 @@ export default function ActivityManager() {
                 <select
                   className={INPUT}
                   value={form.difficulty}
-                  onChange={(e) => set("difficulty", e.target.value)}
+                  onChange={(e) => setDifficulty(e.target.value)}
                 >
                   {[2, 3, 4, 5, 6].map((n) => (
                     <option key={n} value={n}>
@@ -239,20 +258,33 @@ export default function ActivityManager() {
                   </label>
                 </>
               ) : (
-                <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-slate-700 dark:text-slate-200">Grid size</span>
-                  <select
-                    className={INPUT}
-                    value={form.gridSize}
-                    onChange={(e) => set("gridSize", e.target.value)}
-                  >
-                    {[8, 10, 12, 14].map((n) => (
-                      <option key={n} value={n}>
-                        {n} × {n}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <>
+                  <label className="flex flex-col gap-1 text-sm">
+                    <span className="font-medium text-slate-700 dark:text-slate-200">Grid size</span>
+                    <select
+                      className={INPUT}
+                      value={form.gridSize}
+                      onChange={(e) => set("gridSize", e.target.value)}
+                    >
+                      {GRID_SIZES.map((n) => (
+                        <option key={n} value={n}>
+                          {n} × {n}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <div className="sm:col-span-2">
+                    <WordPicker
+                      words={selectedList?.words ?? []}
+                      selectedIds={form.wordIds}
+                      onChange={(ids) => set("wordIds", ids)}
+                      maxPhonemes={Number(form.gridSize)}
+                    />
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      Leave empty to use the first {DEFAULT_WORD_SEARCH_COUNT} words that fit the grid.
+                    </p>
+                  </div>
+                </>
               )}
 
               <label className="flex flex-col gap-1 text-sm sm:col-span-2">
@@ -287,7 +319,7 @@ export default function ActivityManager() {
                 <div>
                   <p className="font-semibold text-slate-800 dark:text-slate-100">
                     <span className="mr-2 rounded bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
-                      {TYPE_LABEL[a.type] ?? a.type}
+                      {ACTIVITY_TYPE_LABEL[a.type] ?? a.type}
                     </span>
                     {a.name}
                   </p>
@@ -295,7 +327,11 @@ export default function ActivityManager() {
                     {a.wordListName} · difficulty {a.difficulty}
                     {a.type === "WORDLE"
                       ? ` · ${a.maxGuesses} guesses`
-                      : ` · ${a.gridSize}×${a.gridSize} grid`}
+                      : ` · ${a.gridSize}×${a.gridSize} grid${
+                          a.outputSettings?.wordIds?.length
+                            ? ` · ${a.outputSettings.wordIds.length} chosen words`
+                            : ""
+                        }`}
                   </p>
                   {warning && (
                     <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-amber-800 dark:text-amber-300">
