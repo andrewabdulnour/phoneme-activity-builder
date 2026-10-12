@@ -30,10 +30,8 @@ export const PATCH = withErrorHandling(async (request, { params }) => {
     return badRequest("Provide at least one field to update");
   }
 
-  const existing = await getActivity(id);
-  if (!existing) return notFound("Activity not found");
-
   const result = await updateActivity(id, data);
+  if (result.notFound) return notFound("Activity not found");
   if (result.error) return badRequest(result.error);
   return jsonOk({ activity: result.activity });
 });
