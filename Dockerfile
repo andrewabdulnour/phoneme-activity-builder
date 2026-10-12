@@ -6,8 +6,10 @@
 #   3. prod-deps   – install production dependencies only + Prisma client
 #   4. runner      – minimal runtime image (non-root, healthcheck)
 #
-# The SQLite database lives on a mounted volume at /app/data so it
-# survives container restarts (see docker-compose.yml).
+# The database is PostgreSQL running in its own container; this image
+# only needs DATABASE_URL to reach it (set in docker-compose.yml). The
+# same image runs both the one-shot `migrate` service and the `app`
+# server — see docker-entrypoint.sh.
 
 FROM node:22-slim AS base
 WORKDIR /app
@@ -40,7 +42,6 @@ FROM base AS runner
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-ENV DATABASE_URL="file:/app/data/prod.db"
 
 # `node` (uid 1000) is a non-root user that already exists in the
 # official Node images.
@@ -54,9 +55,7 @@ COPY --from=builder   --chown=node:node /app/prisma       ./prisma
 COPY --from=builder   --chown=node:node /app/lib/simulation.mjs ./lib/simulation.mjs
 COPY --chown=node:node docker-entrypoint.sh               ./docker-entrypoint.sh
 
-RUN chmod +x docker-entrypoint.sh \
- && mkdir -p /app/data \
- && chown -R node:node /app/data
+RUN chmod +x docker-entrypoint.sh
 
 USER node
 EXPOSE 3000
@@ -65,6 +64,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
-# The entrypoint applies migrations and seeds an empty database, then
-# runs `next start`.
+# `migrate` applies migrations + seeds; `start` (default) runs Next.js.
 ENTRYPOINT ["./docker-entrypoint.sh"]
+CMD ["start"]

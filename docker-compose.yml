@@ -1,24 +1,69 @@
-# Run the whole application (Next.js frontend + backend API + SQLite DB)
-# in one reproducible container:
+# Phoneme Activity Builder — multi-service Docker Compose setup.
 #
-#   docker compose up --build
+#   docker compose up --build              db + migrate + app
 #
-# Then open http://localhost:3000 and http://localhost:3000/health
+# Then open http://localhost:3000 (app) and http://localhost:3000/health.
+#
+# Services
+#   db       PostgreSQL 17. Data lives on the `pgdata` named volume so it
+#            survives `docker compose down` (use `down -v` to wipe it).
+#   migrate  One-shot job: applies Prisma migrations and seeds an empty
+#            database, then exits. Runs from the same image as the app.
+#   app      Next.js server — the React frontend and the REST API route
+#            handlers (/api/*, /health). Starts only after the database
+#            is healthy and the migrate job has finished successfully.
+#
+# Startup order is enforced with healthchecks rather than sleeps:
+#   db (healthy) → migrate (completed successfully) → app (healthy)
+
+x-database-env: &database-env
+  DATABASE_URL: "postgresql://${POSTGRES_USER:-phoneme}:${POSTGRES_PASSWORD:-phoneme}@db:5432/${POSTGRES_DB:-phoneme}?schema=public"
 
 services:
-  app:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-phoneme}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-phoneme}
+      POSTGRES_DB: ${POSTGRES_DB:-phoneme}
+    ports:
+      # Published so `npm run dev` on the host can use the same database.
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  migrate:
     build:
       context: .
       dockerfile: Dockerfile
     image: phoneme-activity-builder
+    command: ["migrate"]
+    environment:
+      <<: *database-env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    image: phoneme-activity-builder
+    command: ["start"]
     ports:
       - "3000:3000"
     environment:
-      # SQLite database file, stored on the named volume below.
-      DATABASE_URL: "file:/app/data/prod.db"
-    volumes:
-      - phoneme-data:/app/data
+      <<: *database-env
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
 
 volumes:
-  phoneme-data:
+  pgdata:

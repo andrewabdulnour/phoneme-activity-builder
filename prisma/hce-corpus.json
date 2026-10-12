@@ -1,5 +1,5 @@
 {
-  "_comment": "HCE (broad Australian English) phoneme word corpus used to seed the database. 90 words: 30 each at 3, 4 and 5 phonemes. Mirrors RAW_CORPUS in lib/phonemeData.js. Each entry is [english, 'space separated phonemes'].",
+  "_comment": "HCE (broad Australian English) phoneme word corpus used to seed the database. 90 words: 30 each at 3, 4 and 5 phonemes. Each entry is [english, 'space separated phonemes'].",
   "3": [
     ["bed", "b e d"], ["bid", "b ɪ d"], ["bad", "b æ d"], ["bud", "b ɐ d"],
     ["bird", "b ɜː d"], ["bark", "b ɐː k"], ["book", "b ʊ k"], ["boot", "b ʉː t"],

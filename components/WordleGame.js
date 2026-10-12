@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import PhonemeKey from "./PhonemeKey";
-import { IPA_KEYBOARD_GROUPS, PHONEME_LENGTHS } from "@/lib/phonemeData";
+import { IPA_KEYBOARD_GROUPS } from "@/lib/phonemeData";
+import { wordleDefaults } from "@/lib/activityRules";
 
 const STATUS_RANK = { gray: 0, yellow: 1, green: 2 };
 
@@ -27,12 +28,17 @@ function scoreGuess(guessTiles, target) {
   return statuses;
 }
 
-// Remounted (via a `key` prop in the parent, keyed on word + length)
-// whenever those settings change, so state is simply initialized from
-// props rather than reset in an effect.
-export default function WordleGame({ word, length }) {
-  const settings = PHONEME_LENGTHS[length] || PHONEME_LENGTHS[3];
+// Remounted (via a `key` prop in the parent, keyed on the word and
+// settings) whenever those change, so state is simply initialized from
+// props rather than reset in an effect. Guesses and pre-fill fall back to
+// the shared per-length defaults (lib/activityRules.js).
+export default function WordleGame({ word, maxGuesses, prefillFirst }) {
   const target = word.phonemes;
+  const defaults = wordleDefaults(target.length);
+  const settings = {
+    maxGuesses: maxGuesses ?? defaults.maxGuesses,
+    prefillFirst: prefillFirst ?? defaults.prefillFirst,
+  };
 
   const [guesses, setGuesses] = useState([]);
   const [current, setCurrent] = useState(() => (settings.prefillFirst ? [target[0]] : []));
