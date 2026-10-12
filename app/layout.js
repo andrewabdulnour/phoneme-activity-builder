@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageTimeTracker from "@/components/PageTimeTracker";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
 const geistSans = Geist({
@@ -30,15 +31,17 @@ export default function RootLayout({ children }) {
     >
       <body className="flex min-h-full flex-col bg-[var(--background)] text-[var(--foreground)]">
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
-        <Navbar />
-        <main id="main-content" className="density-px density-py mx-auto w-full max-w-6xl flex-1">
-          {children}
-        </main>
-        <Footer />
-        <PageTimeTracker />
+        <ThemeProvider>
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
+          <Navbar />
+          <main id="main-content" className="density-px density-py mx-auto w-full max-w-6xl flex-1">
+            {children}
+          </main>
+          <Footer />
+          <PageTimeTracker />
+        </ThemeProvider>
       </body>
     </html>
   );
