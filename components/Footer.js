@@ -6,7 +6,7 @@ export default function Footer() {
           Built by <strong className="text-slate-800 dark:text-slate-200">Andrew Abdulnour</strong> — Student
           No. 20719271
         </p>
-        <p className="text-xs">Assessment 3 · Data-driven Dashboard &amp; Reporting · Phoneme Activity Builder</p>
+        <p className="text-xs">Assessment 4 · Testing, Performance &amp; Technical Defence · Phoneme Activity Builder</p>
       </div>
     </footer>
   );

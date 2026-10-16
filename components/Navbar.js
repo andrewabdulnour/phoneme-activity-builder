@@ -45,7 +45,7 @@ export default function Navbar() {
             <span className="sm:hidden">Phoneme Builder</span>
           </Link>
           <span className="hidden rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 xl:inline dark:bg-indigo-950 dark:text-indigo-300">
-            Assessment 3 — Data &amp; Reporting
+            Assessment 4 — Final System
           </span>
         </div>
 
